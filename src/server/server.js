@@ -1,13 +1,18 @@
 import express from 'express'
-const app = express()
+import mongodb from 'mongodb'
 
-app.use(express.static('build'))
+let runApp = function (db) {
+  const app = express()
+  app.use(express.static('build'))
 
-app.get('/*', function (req, res) {
-  res.sendFile('index.html', {root: __dirname})
-})
+  app.get('/*', function (req, res) {
+    res.sendFile('index.html', {root: __dirname})
+  })
 
-let port = process.env.PORT || 9000
-app.listen(port, function () {
-  console.log(`Listening on port ${port}`)
-})
+  let port = process.env.PORT || 9000
+  app.listen(port, function () {
+    console.log(`Listening on port ${port}`)
+  })
+}
+
+mongodb.MongoClient.connect(process.env.MONGODB_URL).then(runApp)
