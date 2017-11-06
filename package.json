@@ -1,15 +1,24 @@
 {
   "name": "table2",
+  "repository": "https://github.com/shade-tree-software/Table2.git",
+  "engines": {
+    "node": "8"
+  },
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "foreman": "^2.0.0",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-scripts": "1.0.17"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "nf start",
+    "dev_start": "react-scripts start",
     "build": "react-scripts build",
+    "postinstall": "react-scripts build && gulp server",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   }
