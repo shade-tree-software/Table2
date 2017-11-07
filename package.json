@@ -8,12 +8,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bcrypt": "^1.0.3",
     "foreman": "^2.0.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
     "jsonwebtoken": "^8.1.0",
     "mongodb": "^2.2.33",
-    "password-hash": "^1.2.2",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",

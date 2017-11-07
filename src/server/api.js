@@ -1,6 +1,6 @@
 import express from 'express'
 import jwt from 'jsonwebtoken'
-import pwHash from 'password-hash'
+import bcrypt from 'bcrypt'
 import bodyParser from 'body-parser'
 
 export default function (db) {
@@ -13,7 +13,7 @@ export default function (db) {
   api.post('/authenticate', function (req, res) {
     let query = {username: req.body.username}
     db.collection('users').findOne(query).then(function (data) {
-      if (data && pwHash.verify(req.body.password, data.password)) {
+      if (data && bcrypt.compareSync(req.body.password, data.password)) {
         let token = jwt.sign(query, process.env.SECRET)
         res.json({
           success: true,
