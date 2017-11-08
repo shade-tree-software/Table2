@@ -22,14 +22,14 @@ export default class NewTableForm extends React.Component {
     return (
         <form onSubmit={this.submitHandler}>
           <div className="row">
-            <div className="col-lg-3 col-md-4 col-sm-5">
+            <div className="col-lg-4 col-md-5 col-sm-7">
               <input name="tableName"
                      className="form-control"
                      placeholder="Table Name"
                      value={this.state.tableName}
                      onChange={this.changeHandler}/><br/>
             </div>
-            <div className="col-lg-3 col-md-4 col-sm-5">
+            <div className="col-lg-1 col-md-2 col-sm-3">
               <button type="submit"
                       className="btn btn-primary float-right">Add
               </button>

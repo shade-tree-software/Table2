@@ -1,6 +1,7 @@
 import React from 'react'
 
 import NewTableForm from './NewTableForm'
+import TableList from './TableList'
 
 export default class MainPage extends React.Component {
   constructor(props) {
@@ -51,6 +52,7 @@ export default class MainPage extends React.Component {
         <NewTableForm addNewTable={this.addNewTable}/>
         <br/>
         <br/>
+        <TableList history={this.props.history} tables={this.state.tables}/>
       </div>
     )
   }
