@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import bodyParser from 'body-parser'
 import assert from 'assert'
-import mongodb from 'mongodb'
 
 export default function (db) {
 
@@ -48,8 +47,7 @@ export default function (db) {
 
   api.route('/tables')
     .get(function (req, res) {
-      console.log('api/tables')
-      db.collection('tables').find({userId: new mongodb.ObjectID(req.decoded.userId)}, {tableName: true}).toArray(function (err, result) {
+      db.collection('tables').find({userId: req.decoded.userId}, {tableName: true}).toArray(function (err, result) {
         res.send(result)
       })
     })
