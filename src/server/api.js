@@ -2,6 +2,8 @@ import express from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import bodyParser from 'body-parser'
+import assert from 'assert'
+import mongodb from 'mongodb'
 
 export default function (db) {
 
@@ -14,7 +16,7 @@ export default function (db) {
     let query = {username: req.body.username}
     db.collection('users').findOne(query).then(function (data) {
       if (data && bcrypt.compareSync(req.body.password, data.password)) {
-        let token = jwt.sign(query, process.env.SECRET)
+        let token = jwt.sign({userId: data._id}, process.env.SECRET)
         res.json({
           success: true,
           message: 'access granted',
@@ -43,6 +45,23 @@ export default function (db) {
       return res.status(403).send({success: false, message: 'No token provided.'});
     }
   });
+
+  api.route('/tables')
+    .get(function (req, res) {
+      console.log('api/tables')
+      db.collection('tables').find({userId: new mongodb.ObjectID(req.decoded.userId)}, {tableName: true}).toArray(function (err, result) {
+        res.send(result)
+      })
+    })
+    .post(function (req, res) {
+      let table = {tableName: req.body.tableName, userId: req.decoded.userId}
+      db.collection('tables').insertOne(table).then(function (r) {
+        assert.equal(1, r.insertedCount)
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
 
   return api
 }

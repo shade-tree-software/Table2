@@ -6,12 +6,13 @@ let runApp = function (db) {
   const app = express()
   app.use(express.static('build'))
 
-  app.get('/*', function (req, res) {
-    res.sendFile('index.html', {root: __dirname})
-  })
-
   let api = initApi(db)
   app.use('/api', api)
+
+  app.get('/*', function (req, res) {
+    console.log('index')
+    res.sendFile('index.html', {root: __dirname})
+  })
 
   let port = process.env.PORT || 9000
   app.listen(port, function () {
