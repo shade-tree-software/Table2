@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import bodyParser from 'body-parser'
 import assert from 'assert'
+import mongodb from 'mongodb'
 
 export default function (db) {
 
@@ -61,5 +62,43 @@ export default function (db) {
       })
     })
 
+  api.route('/tables/:_id')
+    .get(function (req, res) {
+      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      db.collection('tables').findOne(query).then(function (data) {
+        res.send(data)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
+    .put(function (req, res) {
+      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      let update = {$set: {[req.body.name]: req.body.value}}
+      db.collection('tables').updateOne(query, update).then(function (r) {
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
+    .delete(function (req, res) {
+      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      db.collection('tables').deleteOne(query).then(function (r) {
+        assert.equal(1, r.deletedCount)
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
+
+  api.route('/tables/:_id/columns')
+    .post(function(req, res){
+      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      let update = {$push: {columns: {columnName: req.body.columnName}}}
+      db.collection('tables').updateOne(query, update).then(function (r) {
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
   return api
 }

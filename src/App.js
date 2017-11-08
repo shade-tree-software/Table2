@@ -8,6 +8,7 @@ import NavBar from './NavBar'
 import MainPage from './MainPage'
 import About from './About'
 import LoginForm from './LoginForm'
+import TableDetail from './TableDetail'
 
 class App extends Component {
   render() {
@@ -23,6 +24,8 @@ class App extends Component {
               sessionStorage.authToken ? <MainPage {...props}/> : <Redirect to="/login"/> )}/>
             <Route path="/about" render={() => (
               sessionStorage.authToken ? <About/> : <Redirect to="/login"/> )}/>
+            <Route path="/tables/:_id" render={(props) => (
+              sessionStorage.authToken ? <TableDetail {...props}/> : <Redirect to="/login"/>)}/>
           </div>
         </div>
       </Router>
