@@ -33,14 +33,12 @@ export default class AddColumnButton extends React.Component {
   render() {
     if (this.state.addingColumn) {
       return (
-        <span>
-          <input autoFocus type="text" onChange={this.changeHandler} placeholder="Column Name"
+        <form className="form-inline">
+          <input className="mx-sm-1" autoFocus type="text" onChange={this.changeHandler} placeholder="Column Name"
                  defaultValue={this.state.columnName}/>
-          <span> </span>
-          <button onClick={this.okHandler} type="button" className="btn btn-primary btn-sm">OK</button>
-          <span> </span>
-          <button onClick={this.cancelHandler} type="button" className="btn btn-primary btn-sm">Cancel</button>
-        </span>
+          <button onClick={this.okHandler} type="button" className="mx-sm-1 btn btn-primary btn-sm">OK</button>
+          <button onClick={this.cancelHandler} type="button" className="mx-sm-1 btn btn-primary btn-sm">Cancel</button>
+        </form>
       )
     } else {
       return (
