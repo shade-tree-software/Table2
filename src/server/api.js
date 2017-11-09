@@ -54,8 +54,7 @@ export default function (db) {
     })
     .post(function (req, res) {
       let table = {tableName: req.body.tableName, userId: req.decoded.userId}
-      db.collection('tables').insertOne(table).then(function (r) {
-        assert.equal(1, r.insertedCount)
+      db.collection('tables').insertOne(table).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -65,8 +64,8 @@ export default function (db) {
   api.route('/tables/:_id')
     .get(function (req, res) {
       let query = {_id: new mongodb.ObjectID(req.params._id)}
-      db.collection('tables').findOne(query).then(function (data) {
-        res.send(data)
+      db.collection('tables').findOne(query).then(function (table) {
+        res.send(table)
       }).catch(function (err) {
         console.log(err.stack)
       })
@@ -74,7 +73,7 @@ export default function (db) {
     .put(function (req, res) {
       let query = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$set: {[req.body.name]: req.body.value}}
-      db.collection('tables').updateOne(query, update).then(function (r) {
+      db.collection('tables').updateOne(query, update).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -82,8 +81,7 @@ export default function (db) {
     })
     .delete(function (req, res) {
       let query = {_id: new mongodb.ObjectID(req.params._id)}
-      db.collection('tables').deleteOne(query).then(function (r) {
-        assert.equal(1, r.deletedCount)
+      db.collection('tables').deleteOne(query).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -100,7 +98,18 @@ export default function (db) {
       } else {
         update = {$push: {columns: {columnName: req.body.columnName}}}
       }
-      db.collection('tables').updateOne(query, update).then(function (r) {
+      db.collection('tables').updateOne(query, update).then(function () {
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
+
+  api.route('/tables/:_id/rows')
+    .post(function (req, res) {
+      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      let update = {$push: {rows: {rowId: new mongodb.ObjectId()}}}
+      db.collection('tables').updateOne(query, update).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -111,7 +120,7 @@ export default function (db) {
     .delete(function (req, res) {
       let query = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$pull: {columns: {columnName: req.params.columnName}}}
-      db.collection('tables').updateOne(query, update).then(function (r) {
+      db.collection('tables').updateOne(query, update).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)

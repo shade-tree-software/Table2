@@ -38,7 +38,9 @@ export default class TableDetail extends React.Component {
   }
 
   addNewRow = (e) => {
-
+    fetch(`/api/tables/${this.props.match.params._id}/rows?token=${sessionStorage.authToken}`, {
+      method: 'post'
+    }).then(this.getTableDetails())
   }
 
   onContextMenuItemClick = (e, data, target) => {
@@ -47,7 +49,6 @@ export default class TableDetail extends React.Component {
     } else if (data.command === 'insert') {
       this.setState({insertColumnPosition: target.getAttribute('index')})
       this.showModal()
-      //this.insertColumn('new', target.getAttribute('index'))
     }
   }
 
@@ -69,6 +70,7 @@ export default class TableDetail extends React.Component {
 
   render() {
     let columns = this.state.table.columns || []
+    let rows = this.state.table.rows || []
     return (
       <div>
         <Modal isOpen={this.state.isShowingModal} onRequestClose={this.cancelModal} contentLabel="Column Name"
@@ -87,7 +89,7 @@ export default class TableDetail extends React.Component {
         <h1>{this.state.table.tableName}</h1>
         <table className="table table-hover table-responsive">
           <thead>
-          <tr className="d-flex">
+          <tr>
             {columns.map((column, index) =>
               <th key={index}>
                 <ContextMenuTrigger attributes={{'column-name': column.columnName, index: index}}
@@ -98,6 +100,13 @@ export default class TableDetail extends React.Component {
           </tr>
           </thead>
           <tbody>
+          {rows.map((row) =>
+            <tr key={row.rowId} data-row_id={row.rowId}>{columns.map((column, index) => <td key={index}>?</td>)}
+              <td>
+                <button className="btn btn-danger btn-sm">Delete Row</button>
+              </td>
+            </tr>
+          )}
           </tbody>
         </table>
         <button onClick={this.addNewRow} className="btn btn-primary btn-sm">Add Row</button>
