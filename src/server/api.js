@@ -100,5 +100,16 @@ export default function (db) {
         console.log(err.stack)
       })
     })
+
+  api.route('/tables/:_id/columns/:columnName')
+    .delete(function(req, res){
+      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      let update = {$pull: {columns: {columnName: req.params.columnName}}}
+      db.collection('tables').updateOne(query, update).then(function (r) {
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
   return api
 }

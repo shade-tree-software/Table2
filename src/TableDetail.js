@@ -1,6 +1,8 @@
 import React from 'react'
+import {ContextMenu, MenuItem, ContextMenuTrigger} from "react-contextmenu";
 
 import AddColumnButton from './AddColumnButton'
+import './ReactContextMenu.css'
 
 export default class TableDetail extends React.Component {
   constructor(props) {
@@ -24,16 +26,38 @@ export default class TableDetail extends React.Component {
     this.getTableDetails()
   }
 
+  onContextMenuItemClick = (e, data, target) => {
+    if (data.command === 'delete') {
+      this.deleteColumn(target.getAttribute('column-name'))
+    }
+  }
+
+  deleteColumn = (columnName) => {
+    fetch(`/api/tables/${this.props.match.params._id}/columns/${encodeURIComponent(columnName)}?token=${sessionStorage.authToken}`, {
+      method: 'delete',
+    }).then(this.getTableDetails())
+  }
+
   render() {
     let columns = this.state.table.columns || []
     return (
       <div>
+        <ContextMenu id="column-name-context-menu">
+          <MenuItem data={{command: 'delete'}} onClick={this.onContextMenuItemClick}>
+            Delete Column
+          </MenuItem>
+        </ContextMenu>
         <br/>
         <h1>{this.state.table.tableName}</h1>
         <table className="table table-hover table-responsive">
           <thead>
           <tr>
-            {columns.map((column) => <th key={column.columnName}>{column.columnName}</th>)}
+            {columns.map((column) =>
+              <th key={column.columnName}>
+                <ContextMenuTrigger attributes={{'column-name': column.columnName}}
+                                    id="column-name-context-menu">{column.columnName}</ContextMenuTrigger>
+              </th>
+            )}
             <th><AddColumnButton tableId={this.props.match.params._id} onColumnAdded={this.getTableDetails}/></th>
           </tr>
           </thead>
