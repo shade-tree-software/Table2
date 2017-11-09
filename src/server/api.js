@@ -22,7 +22,7 @@ export default function (db) {
           message: 'access granted',
           token: token
         })
-      } else(
+      } else (
         res.sendStatus(404)
       )
     }).catch(function (err) {
@@ -91,9 +91,15 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/columns')
-    .post(function(req, res){
+    .post(function (req, res) {
       let query = {_id: new mongodb.ObjectID(req.params._id)}
-      let update = {$push: {columns: {columnName: req.body.columnName}}}
+      let update
+      if (req.body.position) {
+        let position = parseInt(req.body.position)
+        update = {$push: {columns: {$each: [{columnName: req.body.columnName}], $position: position}}}
+      } else {
+        update = {$push: {columns: {columnName: req.body.columnName}}}
+      }
       db.collection('tables').updateOne(query, update).then(function (r) {
         res.sendStatus(200)
       }).catch(function (err) {
@@ -102,7 +108,7 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/columns/:columnName')
-    .delete(function(req, res){
+    .delete(function (req, res) {
       let query = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$pull: {columns: {columnName: req.params.columnName}}}
       db.collection('tables').updateOne(query, update).then(function (r) {

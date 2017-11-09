@@ -1,29 +1,20 @@
 import React from 'react'
 
+import AddColumnForm from './AddColumnForm'
+
 export default class AddColumnButton extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {addingColumn: false, columnName: ''}
+    this.state = {addingColumn: false}
   }
 
-  okHandler = () => {
-    let columnName = this.state.columnName
-    this.setState({addingColumn: false, columnName: ''})
-    fetch(`/api/tables/${this.props.tableId}/columns?token=${sessionStorage.authToken}`, {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      method: 'post',
-      body: JSON.stringify({columnName})
-    }).then(this.props.onColumnAdded())
-  }
-
-  changeHandler = (e) => {
-    this.setState({columnName: e.target.value})
+  okHandler = (columnName) => {
+    this.setState({addingColumn: false})
+    this.props.insertColumn(columnName)
   }
 
   cancelHandler = (e) => {
-    this.setState({addingColumn: false, columnName: ''})
+    this.setState({addingColumn: false})
   }
 
   getColumnName = (e) => {
@@ -33,12 +24,7 @@ export default class AddColumnButton extends React.Component {
   render() {
     if (this.state.addingColumn) {
       return (
-        <form className="form-inline">
-          <input className="mx-sm-1" autoFocus type="text" onChange={this.changeHandler} placeholder="Column Name"
-                 defaultValue={this.state.columnName}/>
-          <button onClick={this.okHandler} type="button" className="mx-sm-1 btn btn-primary btn-sm">OK</button>
-          <button onClick={this.cancelHandler} type="button" className="mx-sm-1 btn btn-primary btn-sm">Cancel</button>
-        </form>
+        <AddColumnForm onOk={this.okHandler} onCancel={this.cancelHandler}/>
       )
     } else {
       return (
