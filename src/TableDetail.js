@@ -4,7 +4,7 @@ import Modal from 'react-modal';
 
 import AddColumnButton from './AddColumnButton'
 import TextBoxForm from './TextBoxForm'
-import TableCell from './TableCell'
+import TableBody from './TableBody'
 import './ReactContextMenu.css'
 
 export default class TableDetail extends React.Component {
@@ -100,20 +100,7 @@ export default class TableDetail extends React.Component {
             <th><AddColumnButton insertColumn={this.insertColumn}/></th>
           </tr>
           </thead>
-          <tbody>
-          {rows.map((row) =>
-            <tr key={row.rowId} data-row_id={row.rowId}>{columns.map((column, index) => {
-              let text= row.values ? row.values[column.columnName] || '' : ''
-              return (<TableCell key={index}
-                                 text={text}/>
-              )
-            })}
-              <td>
-                <button className="btn btn-danger btn-sm">Delete Row</button>
-              </td>
-            </tr>
-          )}
-          </tbody>
+          <TableBody rows={rows} columns={columns}/>
         </table>
         <button onClick={this.addNewRow} className="btn btn-primary btn-sm">Add Row</button>
       </div>
