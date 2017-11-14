@@ -102,8 +102,12 @@ export default class TableDetail extends React.Component {
           </thead>
           <tbody>
           {rows.map((row) =>
-            <tr key={row.rowId} data-row_id={row.rowId}>{columns.map((column, index) => <TableCell key={index}
-                                                                                                   text={row[column.columnName]}/>)}
+            <tr key={row.rowId} data-row_id={row.rowId}>{columns.map((column, index) => {
+              let text= row.values ? row.values[column.columnName] || '' : ''
+              return (<TableCell key={index}
+                                 text={text}/>
+              )
+            })}
               <td>
                 <button className="btn btn-danger btn-sm">Delete Row</button>
               </td>

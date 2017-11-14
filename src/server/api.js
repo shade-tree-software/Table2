@@ -116,6 +116,12 @@ export default function (db) {
       })
     })
 
+  api.route('/tables/:tableId/rows/:rowId')
+    .put(function(req, res){
+      let query = {_id: new mongodb.ObjectID(req.params.tableId)}
+      //let update = {$push}
+    })
+
   api.route('/tables/:_id/columns/:columnName')
     .delete(function (req, res) {
       let query = {_id: new mongodb.ObjectID(req.params._id)}
