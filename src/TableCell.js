@@ -8,10 +8,15 @@ export default class TableCell extends React.Component {
     this.state = {editing: false}
   }
 
-  okHandler = (newText) => {
+  okHandler = (columnValue) => {
     this.setState({editing: false})
-    console.log(newText)
-  }
+    fetch(`/api/tables/${this.props.tableId}/rows/${this.props.rowId}?token=${sessionStorage.authToken}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'put',
+      body: JSON.stringify({columnName: this.props.columnName, columnValue})
+    }).then(this.props.onCellChanged())  }
 
   cancelHandler = (e) => {
     this.setState({editing: false})

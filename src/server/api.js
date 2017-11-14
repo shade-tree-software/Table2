@@ -13,8 +13,8 @@ export default function (db) {
   api.use(bodyParser.json())
 
   api.post('/authenticate', function (req, res) {
-    let query = {username: req.body.username}
-    db.collection('users').findOne(query).then(function (data) {
+    let filter = {username: req.body.username}
+    db.collection('users').findOne(filter).then(function (data) {
       if (data && bcrypt.compareSync(req.body.password, data.password)) {
         let token = jwt.sign({userId: data._id}, process.env.SECRET)
         res.json({
@@ -48,13 +48,16 @@ export default function (db) {
 
   api.route('/tables')
     .get(function (req, res) {
-      db.collection('tables').find({userId: req.decoded.userId}, {tableName: true}).toArray(function (err, result) {
+      db.collection('tables').find(
+        {userId: req.decoded.userId},
+        {tableName: true},
+        {readPreference: mongodb.ReadPreference.PRIMARY}).toArray(function (err, result) {
         res.send(result)
       })
     })
     .post(function (req, res) {
       let table = {tableName: req.body.tableName, userId: req.decoded.userId}
-      db.collection('tables').insertOne(table).then(function () {
+      db.collection('tables').insertOne(table, {w: "majority"}).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -63,25 +66,26 @@ export default function (db) {
 
   api.route('/tables/:_id')
     .get(function (req, res) {
-      let query = {_id: new mongodb.ObjectID(req.params._id)}
-      db.collection('tables').findOne(query).then(function (table) {
+      let filter = {_id: new mongodb.ObjectID(req.params._id)}
+      db.collection('tables').findOne(filter,
+        {readPreference: mongodb.ReadPreference.PRIMARY}).then(function (table) {
         res.send(table)
       }).catch(function (err) {
         console.log(err.stack)
       })
     })
     .put(function (req, res) {
-      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$set: {[req.body.name]: req.body.value}}
-      db.collection('tables').updateOne(query, update).then(function () {
+      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
       })
     })
     .delete(function (req, res) {
-      let query = {_id: new mongodb.ObjectID(req.params._id)}
-      db.collection('tables').deleteOne(query).then(function () {
+      let filter = {_id: new mongodb.ObjectID(req.params._id)}
+      db.collection('tables').deleteOne(filter, {w: "majority"}).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -90,7 +94,7 @@ export default function (db) {
 
   api.route('/tables/:_id/columns')
     .post(function (req, res) {
-      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update
       if (req.body.position) {
         let position = parseInt(req.body.position)
@@ -98,7 +102,7 @@ export default function (db) {
       } else {
         update = {$push: {columns: {columnName: req.body.columnName}}}
       }
-      db.collection('tables').updateOne(query, update).then(function () {
+      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -107,9 +111,9 @@ export default function (db) {
 
   api.route('/tables/:_id/rows')
     .post(function (req, res) {
-      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$push: {rows: {rowId: new mongodb.ObjectId()}}}
-      db.collection('tables').updateOne(query, update).then(function () {
+      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -117,16 +121,31 @@ export default function (db) {
     })
 
   api.route('/tables/:tableId/rows/:rowId')
-    .put(function(req, res){
-      let query = {_id: new mongodb.ObjectID(req.params.tableId)}
-      //let update = {$push}
+    .put(function (req, res) {
+      let filter = {_id: new mongodb.ObjectID(req.params.tableId), 'rows.rowId': new mongodb.ObjectID(req.params.rowId)}
+      let rowCriteria = `rows.$.values.${req.body.columnName}`
+      let update = {$set: {[rowCriteria]: req.body.columnValue}}
+      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
+    .delete(function (req, res) {
+      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
+      let update = {$pull: {rows: {rowId: new mongodb.ObjectID(req.params.rowId)}}}
+      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
     })
 
   api.route('/tables/:_id/columns/:columnName')
     .delete(function (req, res) {
-      let query = {_id: new mongodb.ObjectID(req.params._id)}
+      let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$pull: {columns: {columnName: req.params.columnName}}}
-      db.collection('tables').updateOne(query, update).then(function () {
+      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)

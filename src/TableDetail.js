@@ -71,7 +71,6 @@ export default class TableDetail extends React.Component {
 
   render() {
     let columns = this.state.table.columns || []
-    let rows = this.state.table.rows || []
     return (
       <div>
         <Modal isOpen={this.state.isShowingModal} onRequestClose={this.cancelModal} contentLabel="Column Name"
@@ -100,7 +99,7 @@ export default class TableDetail extends React.Component {
             <th><AddColumnButton insertColumn={this.insertColumn}/></th>
           </tr>
           </thead>
-          <TableBody rows={rows} columns={columns}/>
+          <TableBody table={this.state.table} onTableChanged={this.getTableDetails}/>
         </table>
         <button onClick={this.addNewRow} className="btn btn-primary btn-sm">Add Row</button>
       </div>
