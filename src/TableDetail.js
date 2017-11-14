@@ -3,7 +3,8 @@ import {ContextMenu, MenuItem, ContextMenuTrigger} from "react-contextmenu";
 import Modal from 'react-modal';
 
 import AddColumnButton from './AddColumnButton'
-import AddColumnForm from './AddColumnForm'
+import TextBoxForm from './TextBoxForm'
+import TableCell from './TableCell'
 import './ReactContextMenu.css'
 
 export default class TableDetail extends React.Component {
@@ -75,7 +76,7 @@ export default class TableDetail extends React.Component {
       <div>
         <Modal isOpen={this.state.isShowingModal} onRequestClose={this.cancelModal} contentLabel="Column Name"
                style={{content: {display: 'inline-block', right: 'unset', bottom: 'unset'}}}>
-          <AddColumnForm onOk={this.okModal} onCancel={this.cancelModal}/>
+          <TextBoxForm onOk={this.okModal} onCancel={this.cancelModal} placeholder='Column Name'/>
         </Modal>
         <ContextMenu id="column-name-context-menu">
           <MenuItem data={{command: 'insert'}} onClick={this.onContextMenuItemClick}>
@@ -101,7 +102,8 @@ export default class TableDetail extends React.Component {
           </thead>
           <tbody>
           {rows.map((row) =>
-            <tr key={row.rowId} data-row_id={row.rowId}>{columns.map((column, index) => <td key={index}>?</td>)}
+            <tr key={row.rowId} data-row_id={row.rowId}>{columns.map((column, index) => <TableCell key={index}
+                                                                                                   text={row[column.columnName]}/>)}
               <td>
                 <button className="btn btn-danger btn-sm">Delete Row</button>
               </td>

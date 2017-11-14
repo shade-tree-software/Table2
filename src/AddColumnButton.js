@@ -1,6 +1,6 @@
 import React from 'react'
 
-import AddColumnForm from './AddColumnForm'
+import TextBoxForm from './TextBoxForm'
 
 export default class AddColumnButton extends React.Component {
   constructor(props) {
@@ -24,7 +24,7 @@ export default class AddColumnButton extends React.Component {
   render() {
     if (this.state.addingColumn) {
       return (
-        <AddColumnForm onOk={this.okHandler} onCancel={this.cancelHandler}/>
+        <TextBoxForm onOk={this.okHandler} onCancel={this.cancelHandler} placeholder='Column Name'/>
       )
     } else {
       return (
