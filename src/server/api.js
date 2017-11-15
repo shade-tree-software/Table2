@@ -12,6 +12,7 @@ export default function (db) {
   api.use(bodyParser.urlencoded({extended: false}))
   api.use(bodyParser.json())
 
+  // Get authentication token
   api.post('/authenticate', function (req, res) {
     let filter = {username: req.body.username}
     db.collection('users').findOne(filter).then(function (data) {
@@ -30,6 +31,7 @@ export default function (db) {
     })
   });
 
+  // Validate authentication token
   api.use(function (req, res, next) {
     let token = req.body.token || req.query.token || req.headers['x-access-token'];
     if (token) {
@@ -47,6 +49,7 @@ export default function (db) {
   });
 
   api.route('/tables')
+    // Get all table names for the specified user
     .get(function (req, res) {
       db.collection('tables').find(
         {userId: req.decoded.userId},
@@ -55,6 +58,7 @@ export default function (db) {
         res.send(result)
       })
     })
+    // Insert a new table for the specified user
     .post(function (req, res) {
       let table = {tableName: req.body.tableName, userId: req.decoded.userId}
       db.collection('tables').insertOne(table, {w: "majority"}).then(function () {
@@ -65,6 +69,7 @@ export default function (db) {
     })
 
   api.route('/tables/:_id')
+    // Get the complete contents of a specific table
     .get(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       db.collection('tables').findOne(filter,
@@ -74,6 +79,7 @@ export default function (db) {
         console.log(err.stack)
       })
     })
+    // Set the value of a particular field in a table
     .put(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$set: {[req.body.name]: req.body.value}}
@@ -83,6 +89,7 @@ export default function (db) {
         console.log(err.stack)
       })
     })
+    // Delete a table
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       db.collection('tables').deleteOne(filter, {w: "majority"}).then(function () {
@@ -93,6 +100,7 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/columns')
+    // Add or insert a new column into a table
     .post(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update
@@ -110,6 +118,7 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/rows')
+    // Add a new row to a table
     .post(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$push: {rows: {rowId: new mongodb.ObjectId()}}}
@@ -121,6 +130,7 @@ export default function (db) {
     })
 
   api.route('/tables/:tableId/rows/:rowId')
+    // Set the value of a table cell
     .put(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params.tableId), 'rows.rowId': new mongodb.ObjectID(req.params.rowId)}
       let rowCriteria = `rows.$.values.${req.body.columnName}`
@@ -131,6 +141,7 @@ export default function (db) {
         console.log(err.stack)
       })
     })
+    // Delete a row
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       let update = {$pull: {rows: {rowId: new mongodb.ObjectID(req.params.rowId)}}}
@@ -142,6 +153,7 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/columns/:columnName')
+    // Delete a column
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$pull: {columns: {columnName: req.params.columnName}}}
