@@ -87,9 +87,9 @@ export default class TableDetail extends React.Component {
         </ContextMenu>
         <br/>
         <h1>{this.state.table.tableName}</h1>
-        <table className="table table-hover table-responsive">
+        <table className="table table-hover table-responsive table-striped">
           <thead>
-          <tr>
+          <tr className="large-only">
             {columns.map((column, index) =>
               <th key={index}>
                 <ContextMenuTrigger attributes={{'column-name': column.columnName, index: index}}
@@ -101,7 +101,7 @@ export default class TableDetail extends React.Component {
           </thead>
           <TableBody table={this.state.table} onTableChanged={this.getTableDetails}/>
         </table>
-        <button onClick={this.addNewRow} className="btn btn-primary btn-sm">Add Row</button>
+        <button onClick={this.addNewRow} className="btn btn-primary btn-sm">+</button>
       </div>
     )
   }

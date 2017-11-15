@@ -29,7 +29,7 @@ export default class AddColumnButton extends React.Component {
     } else {
       return (
         <span>
-          <button onClick={this.getColumnName} className="btn btn-primary btn-sm">Add Column</button>
+          <button onClick={this.getColumnName} className="btn btn-primary btn-sm">+</button>
         </span>
       )
     }

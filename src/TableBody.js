@@ -15,7 +15,7 @@ export default class TableBody extends React.Component {
     return (
       <tbody>
       {rows.map((row) =>
-        <tr key={row.rowId}>{columns.map((column, index) => {
+        <tr className="stackable" key={row.rowId}>{columns.map((column, index) => {
           let text = row.values ? row.values[column.columnName] || '' : ''
           return (<TableCell key={index}
                              tableId={this.props.table._id}
@@ -26,7 +26,7 @@ export default class TableBody extends React.Component {
           )
         })}
           <td>
-            <button onClick={(e) => this.onDeleteRowClick(e, row.rowId)} className="btn btn-danger btn-sm">Delete Row</button>
+            <button onClick={(e) => this.onDeleteRowClick(e, row.rowId)} className="btn btn-danger btn-sm">X</button>
           </td>
         </tr>
       )}
