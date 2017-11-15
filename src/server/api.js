@@ -49,7 +49,7 @@ export default function (db) {
   });
 
   api.route('/tables')
-    // Get all table names for the specified user
+  // Get all table names for the specified user
     .get(function (req, res) {
       db.collection('tables').find(
         {userId: req.decoded.userId},
@@ -69,12 +69,36 @@ export default function (db) {
     })
 
   api.route('/tables/:_id')
-    // Get the complete contents of a specific table
+  // Get the complete contents of a specific table
     .get(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       db.collection('tables').findOne(filter,
         {readPreference: mongodb.ReadPreference.PRIMARY}).then(function (table) {
-        res.send(table)
+        if (!table.rows) {
+          res.send(table)
+        } else {
+          let rowCount = table.rows.length
+          table.rows.forEach(function (row) {
+            let doneCells = false
+            db.collection('cells').find({rowId: row.rowId},
+              {readPreference: mongodb.ReadPreference.PRIMARY}).toArray().then(function (cells) {
+              console.log(JSON.stringify(cells))
+              cells.forEach(function (cell) {
+                if (!row.cells) {
+                  row.cells = []
+                }
+                row.cells.push({columnName: cell.columnName, value: cell.value})
+              })
+              doneCells = true
+              console.log(JSON.stringify(row))
+              rowCount--
+              if (rowCount === 0) {
+                console.log(JSON.stringify(table))
+                res.send(table)
+              }
+            })
+          })
+        }
       }).catch(function (err) {
         console.log(err.stack)
       })
@@ -100,7 +124,7 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/columns')
-    // Add or insert a new column into a table
+  // Add or insert a new column into a table
     .post(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update
@@ -118,7 +142,7 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/rows')
-    // Add a new row to a table
+  // Add a new row to a table
     .post(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$push: {rows: {rowId: new mongodb.ObjectId()}}}
@@ -130,12 +154,15 @@ export default function (db) {
     })
 
   api.route('/tables/:tableId/rows/:rowId')
-    // Set the value of a table cell
+  // Set the value of a table cell
     .put(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params.tableId), 'rows.rowId': new mongodb.ObjectID(req.params.rowId)}
-      let rowCriteria = `rows.$.values.${req.body.columnName}`
-      let update = {$set: {[rowCriteria]: req.body.columnValue}}
-      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
+      let filter = {rowId: new mongodb.ObjectID(req.params.rowId), columnName: req.body.columnName}
+      let update = {
+        rowId: new mongodb.ObjectID(req.params.rowId),
+        columnName: req.body.columnName,
+        value: req.body.columnValue
+      }
+      db.collection('cells').updateOne(filter, update, {upsert: true, w: "majority"}).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -153,7 +180,7 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/columns/:columnName')
-    // Delete a column
+  // Delete a column
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$pull: {columns: {columnName: req.params.columnName}}}
