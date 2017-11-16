@@ -53,15 +53,14 @@ export default function (db) {
     .get(function (req, res) {
       db.collection('tables').find(
         {userId: req.decoded.userId},
-        {tableName: true},
-        {readPreference: mongodb.ReadPreference.PRIMARY}).toArray(function (err, result) {
+        {tableName: true}).toArray(function (err, result) {
         res.send(result)
       })
     })
     // Insert a new table for the specified user
     .post(function (req, res) {
       let table = {tableName: req.body.tableName, userId: req.decoded.userId}
-      db.collection('tables').insertOne(table, {w: "majority"}).then(function () {
+      db.collection('tables').insertOne(table).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -72,33 +71,16 @@ export default function (db) {
   // Get the complete contents of a specific table
     .get(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
-      db.collection('tables').findOne(filter,
-        {readPreference: mongodb.ReadPreference.PRIMARY}).then(function (table) {
-        if (!table.rows) {
-          res.send(table)
-        } else {
-          let rowCount = table.rows.length
-          table.rows.forEach(function (row) {
-            let doneCells = false
-            db.collection('cells').find({rowId: row.rowId},
-              {readPreference: mongodb.ReadPreference.PRIMARY}).toArray().then(function (cells) {
-              console.log(JSON.stringify(cells))
-              cells.forEach(function (cell) {
-                if (!row.cells) {
-                  row.cells = []
-                }
-                row.cells.push({columnName: cell.columnName, value: cell.value})
-              })
-              doneCells = true
-              console.log(JSON.stringify(row))
-              rowCount--
-              if (rowCount === 0) {
-                console.log(JSON.stringify(table))
-                res.send(table)
-              }
-            })
+      db.collection('tables').findOne(filter).then(function (table) {
+        let rowIds = table.rows.map((row) => ( row.rowId ))
+        db.collection('cells').find({rowId: {$in: rowIds}}).toArray().then(function (cells) {
+          console.log(JSON.stringify(cells))
+          res.send({
+            rows: table.rows, columns: table.columns || [], cells, tableName: table.tableName, tableId: table._id
           })
-        }
+        }).catch(function (err) {
+          console.log(err.stack)
+        })
       }).catch(function (err) {
         console.log(err.stack)
       })
@@ -107,7 +89,7 @@ export default function (db) {
     .put(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$set: {[req.body.name]: req.body.value}}
-      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
+      db.collection('tables').updateOne(filter, update).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -116,7 +98,7 @@ export default function (db) {
     // Delete a table
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
-      db.collection('tables').deleteOne(filter, {w: "majority"}).then(function () {
+      db.collection('tables').deleteOne(filter).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -134,7 +116,7 @@ export default function (db) {
       } else {
         update = {$push: {columns: {columnName: req.body.columnName}}}
       }
-      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
+      db.collection('tables').updateOne(filter, update).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {
         console.log(err.stack)
@@ -145,9 +127,10 @@ export default function (db) {
   // Add a new row to a table
     .post(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
-      let update = {$push: {rows: {rowId: new mongodb.ObjectId()}}}
-      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
-        res.sendStatus(200)
+      let rowId = new mongodb.ObjectId()
+      let update = {$push: {rows: {rowId}}}
+      db.collection('tables').updateOne(filter, update).then(function () {
+        res.send({rowId})
       }).catch(function (err) {
         console.log(err.stack)
       })
@@ -160,10 +143,10 @@ export default function (db) {
       let update = {
         rowId: new mongodb.ObjectID(req.params.rowId),
         columnName: req.body.columnName,
-        value: req.body.columnValue
+        value: req.body.cellValue
       }
-      db.collection('cells').updateOne(filter, update, {upsert: true, w: "majority"}).then(function () {
-        res.sendStatus(200)
+      db.collection('cells').updateOne(filter, update, {upsert: true}).then(function (r) {
+        res.send({cellId: r.upsertedId._id})
       }).catch(function (err) {
         console.log(err.stack)
       })
@@ -172,8 +155,13 @@ export default function (db) {
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       let update = {$pull: {rows: {rowId: new mongodb.ObjectID(req.params.rowId)}}}
-      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
-        res.sendStatus(200)
+      db.collection('tables').updateOne(filter, update).then(function () {
+        filter = {rowId: new mongodb.ObjectID(req.params.rowId)}
+        db.collection('cells').deleteMany(filter).then(function () {
+          res.sendStatus(200)
+        }).catch(function (err) {
+          console.log(err.stack)
+        })
       }).catch(function (err) {
         console.log(err.stack)
       })
@@ -184,8 +172,13 @@ export default function (db) {
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       let update = {$pull: {columns: {columnName: req.params.columnName}}}
-      db.collection('tables').updateOne(filter, update, {w: "majority"}).then(function () {
-        res.sendStatus(200)
+      db.collection('tables').updateOne(filter, update).then(function () {
+        filter = {columnName: req.params.columnName}
+        db.collection('cells').deleteMany(filter).then(function () {
+          res.sendStatus(200)
+        }).catch(function (err) {
+          console.log(err.stack)
+        })
       }).catch(function (err) {
         console.log(err.stack)
       })

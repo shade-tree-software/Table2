@@ -4,33 +4,36 @@ import TableCell from './TableCell'
 
 export default class TableBody extends React.Component {
   onDeleteRowClick = (e, rowId) => {
-    fetch(`/api/tables/${this.props.table._id}/rows/${rowId}?token=${sessionStorage.authToken}`, {
+    fetch(`/api/tables/${this.props.tableId}/rows/${rowId}?token=${sessionStorage.authToken}`, {
       method: 'delete',
-    }).then(this.props.onTableChanged())
+    }).then(this.props.onRowDeleted(rowId))
   }
 
   render() {
-    let rows = this.props.table.rows || []
-    let columns = this.props.table.columns || []
+    let rows = {}
+    this.props.rows.forEach((row) => {
+      rows[row.rowId] = {}
+    })
+    this.props.cells.forEach((cell) => {
+      rows[cell.rowId][cell.columnName] = {cellId: cell._id, cellText: cell.value}
+    })
+    console.log('rows', JSON.stringify(rows))
     return (
       <tbody>
-      {rows.map((row) => {
-        let rowValues = {}
-        if (row.cells) {
-          row.cells.forEach((cell) => rowValues[cell.columnName] = cell.value)
-        }
+      {Object.entries(rows).map(([rowId, rowData]) => {
+        console.log(`rowId: ${rowId}, rowData: ${JSON.stringify(rowData)}`)
         return (
-          <tr className="stackable" key={row.rowId}>{columns.map((column, index) => {
-            return (<TableCell key={index}
-                               tableId={this.props.table._id}
-                               rowId={row.rowId}
-                               columnName={column.columnName}
-                               text={rowValues[column.columnName] || ''}
-                               onCellChanged={this.props.onTableChanged}/>
-            )
-          })}
+          <tr className="stackable" key={rowId}>{this.props.columns.map((column, index) => (
+            <TableCell key={index}
+                       tableId={this.props.tableId}
+                       rowId={rowId}
+                       columnName={column.columnName}
+                       text={rowData[column.columnName] ? rowData[column.columnName].cellText : ''}
+                       cellId={rowData[column.columnName] ? rowData[column.columnName].cellId : null}
+                       onCellChanged={this.props.onCellChanged}/>
+          ))}
             <td>
-              <button onClick={(e) => this.onDeleteRowClick(e, row.rowId)} className="btn btn-danger btn-sm">X</button>
+              <button onClick={(e) => this.onDeleteRowClick(e, rowId)} className="btn btn-danger btn-sm">X</button>
             </td>
           </tr>
         )
