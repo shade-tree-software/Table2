@@ -15,13 +15,13 @@ export default class TableBody extends React.Component {
       rows[row.rowId] = {}
     })
     this.props.cells.forEach((cell) => {
-      rows[cell.rowId][cell.columnName] = {cellId: cell._id, cellText: cell.value}
+      if (rows[cell.rowId]) {
+        rows[cell.rowId][cell.columnName] = {cellId: cell._id, cellText: cell.value}
+      }
     })
-    console.log('rows', JSON.stringify(rows))
     return (
       <tbody>
       {Object.entries(rows).map(([rowId, rowData]) => {
-        console.log(`rowId: ${rowId}, rowData: ${JSON.stringify(rowData)}`)
         return (
           <tr className="stackable" key={rowId}>{this.props.columns.map((column, index) => (
             <TableCell key={index}

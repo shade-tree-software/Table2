@@ -26,11 +26,13 @@ export default class TextBoxForm extends React.Component {
   render() {
     return (
       <form className="form-inline" onSubmit={this.okHandler}>
-        <input className="mx-sm-1" autoFocus type="text" onChange={this.changeHandler}
+        <input className="m-1" autoFocus type="text" onChange={this.changeHandler}
                placeholder={this.props.placeholder || ''}
                defaultValue={this.state.textValue}/>
-        <button onClick={this.okHandler} type="button" className="mx-sm-1 btn btn-primary btn-sm">OK</button>
-        <button onClick={this.cancelHandler} type="button" className="mx-sm-1 btn btn-primary btn-sm">Cancel</button>
+        <div>
+          <button onClick={this.okHandler} type="button" className="mx-1 btn btn-primary btn-sm">OK</button>
+          <button onClick={this.cancelHandler} type="button" className="mx-1 btn btn-primary btn-sm">Cancel</button>
+        </div>
       </form>
     )
   }

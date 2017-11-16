@@ -74,7 +74,6 @@ export default function (db) {
       db.collection('tables').findOne(filter).then(function (table) {
         let rowIds = table.rows.map((row) => ( row.rowId ))
         db.collection('cells').find({rowId: {$in: rowIds}}).toArray().then(function (cells) {
-          console.log(JSON.stringify(cells))
           res.send({
             rows: table.rows, columns: table.columns || [], cells, tableName: table.tableName, tableId: table._id
           })

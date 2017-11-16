@@ -35,7 +35,6 @@ export default class TableDetail extends React.Component {
       return response.json()
     }).then((tableData) => {
       this.setState(tableData)
-      console.log(JSON.stringify(this.state))
     })
   }
 
@@ -48,7 +47,6 @@ export default class TableDetail extends React.Component {
     }).then((response) => {
       return response.json()
     }).then((newRow) => {
-      console.log('newRow', JSON.stringify(newRow))
       this.setState((prevState) => ({
         rows: [...prevState.rows, newRow]
       }))
