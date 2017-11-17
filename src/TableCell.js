@@ -1,4 +1,5 @@
 import React from 'react'
+import {ContextMenuTrigger} from "react-contextmenu";
 
 import TextBoxForm from './TextBoxForm'
 
@@ -15,7 +16,7 @@ export default class TableCell extends React.Component {
         'Content-Type': 'application/json'
       },
       method: 'put',
-      body: JSON.stringify({columnName: this.props.columnName, cellValue})
+      body: JSON.stringify({columnName: this.props.column.columnName, cellValue})
     }).then((response) => {
       return response.json()
     }).then((cellInfo) => {
@@ -23,7 +24,7 @@ export default class TableCell extends React.Component {
         _id: cellInfo.cellId,
         value: cellValue,
         rowId: this.props.rowId,
-        columnName: this.props.columnName
+        columnName: this.props.column.columnName
       })
     })
   }
@@ -40,14 +41,18 @@ export default class TableCell extends React.Component {
     if (this.state.editing) {
       return (
         <td>
-          <span className="small-only bold-text">{this.props.columnName}: </span>
-          <TextBoxForm initialText={this.props.text} onOk={this.okHandler} onCancel={this.cancelHandler}/>
+          <span className="small-only bold-text">{this.props.column.columnName}: </span>
+          <TextBoxForm initialText={this.props.text} onOk={this.okHandler}
+                       onCancel={this.cancelHandler}/>
         </td>
       )
     } else {
       return (
-        <td onClick={this.onCellClick}>
-          <span className="small-only bold-text">{this.props.columnName}: </span>{this.props.text}
+        <td onClick={this.onCellClick} className={this.props.column.hiddenOnMobile ? 'large-only' : ''}>
+          <ContextMenuTrigger attributes={{'column-name': this.props.column.columnName}}
+                              id="mobile-field-context-menu">
+            <span className="small-only bold-text">{this.props.column.columnName}: </span>{this.props.text}
+          </ContextMenuTrigger>
         </td>
       )
     }

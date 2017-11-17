@@ -72,7 +72,21 @@ export default class TableDetail extends React.Component {
       this.setState({sortColumn: target.getAttribute('column-name'), sortOrder: 'asc'})
     } else if (data.command === 'sort-desc') {
       this.setState({sortColumn: target.getAttribute('column-name'), sortOrder: 'desc'})
+    } else if (data.command === 'hide') {
+      let columnIndex = this.state.columns.findIndex((column) => (column.columnName === target.getAttribute('column-name')))
+      let newColumn = {columnName: target.getAttribute('column-name'), hiddenOnMobile: true}
+      this.setState((prevState) => ({columns: [...prevState.columns.slice(0, columnIndex), newColumn, ...prevState.columns.slice(columnIndex + 1)]}))
     }
+  }
+
+  showHiddenFields = () => {
+    this.setState((prevState) => {
+      let columns = []
+      prevState.columns.forEach((column) => {
+        columns.push({columnName: column.columnName, hiddenOnMobile: false})
+      })
+      return {columns}
+    })
   }
 
   deleteColumn = (columnName) => {
@@ -116,7 +130,7 @@ export default class TableDetail extends React.Component {
   }
 
   sortLegend = (columnName) => {
-    if (columnName === this.state.sortColumn){
+    if (columnName === this.state.sortColumn) {
       return this.state.sortOrder === 'asc' ? <span> &#x25B2;</span> : <span> &#x25BC;</span>
     }
   }
@@ -142,6 +156,11 @@ export default class TableDetail extends React.Component {
             Delete Column
           </MenuItem>
         </ContextMenu>
+        <ContextMenu id="mobile-field-context-menu">
+          <MenuItem data={{command: 'hide'}} onClick={this.onContextMenuItemClick}>
+            Hide this field
+          </MenuItem>
+        </ContextMenu>
         <br/>
         <h1>{this.state.tableName}</h1>
         <table className="table table-hover table-striped">
@@ -160,7 +179,7 @@ export default class TableDetail extends React.Component {
           <TableBody
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
             onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumn={this.state.sortColumn}
-            sortOrder={this.state.sortOrder}/>
+            sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenFields}/>
         </table>
         <button onClick={this.addNewRow} className="btn btn-primary btn-sm">+</button>
       </div>
