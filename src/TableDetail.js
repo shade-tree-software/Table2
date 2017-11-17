@@ -144,7 +144,7 @@ export default class TableDetail extends React.Component {
         </ContextMenu>
         <br/>
         <h1>{this.state.tableName}</h1>
-        <table className="table table-hover table-responsive table-striped">
+        <table className="table table-hover table-striped">
           <thead>
           <tr className="large-only">
             {this.state.columns.map((column, index) =>
