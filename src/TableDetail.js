@@ -10,7 +10,16 @@ import './ReactContextMenu.css'
 export default class TableDetail extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {rows: [], columns: [], cells: [], tableName: '', tableId: '', isShowingModal: false}
+    this.state = {
+      rows: [],
+      columns: [],
+      cells: [],
+      tableName: '',
+      tableId: '',
+      isShowingModal: false,
+      sortColumn: '',
+      sortOrder: 'asc'
+    }
   }
 
   componentDidMount() {
@@ -59,6 +68,10 @@ export default class TableDetail extends React.Component {
     } else if (data.command === 'insert') {
       this.setState({insertColumnPosition: target.getAttribute('index')})
       this.showModal()
+    } else if (data.command === 'sort-asc') {
+      this.setState({sortColumn: target.getAttribute('column-name'), sortOrder: 'asc'})
+    } else if (data.command === 'sort-desc') {
+      this.setState({sortColumn: target.getAttribute('column-name'), sortOrder: 'desc'})
     }
   }
 
@@ -102,6 +115,12 @@ export default class TableDetail extends React.Component {
     })
   }
 
+  sortLegend = (columnName) => {
+    if (columnName === this.state.sortColumn){
+      return this.state.sortOrder === 'asc' ? <span> &#x25B2;</span> : <span> &#x25BC;</span>
+    }
+  }
+
   render() {
     return (
       <div>
@@ -110,6 +129,12 @@ export default class TableDetail extends React.Component {
           <TextBoxForm onOk={this.okModal} onCancel={this.cancelModal} placeholder='Column Name'/>
         </Modal>
         <ContextMenu id="column-name-context-menu">
+          <MenuItem data={{command: 'sort-asc'}} onClick={this.onContextMenuItemClick}>
+            Sort Column Ascending
+          </MenuItem>
+          <MenuItem data={{command: 'sort-desc'}} onClick={this.onContextMenuItemClick}>
+            Sort Column Descending
+          </MenuItem>
           <MenuItem data={{command: 'insert'}} onClick={this.onContextMenuItemClick}>
             Insert Column
           </MenuItem>
@@ -125,7 +150,8 @@ export default class TableDetail extends React.Component {
             {this.state.columns.map((column, index) =>
               <th key={index}>
                 <ContextMenuTrigger attributes={{'column-name': column.columnName, index: index}}
-                                    id="column-name-context-menu">{column.columnName}</ContextMenuTrigger>
+                                    id="column-name-context-menu">{column.columnName}
+                  {this.sortLegend(column.columnName)}</ContextMenuTrigger>
               </th>
             )}
             <th><AddColumnButton insertColumn={this.insertColumn}/></th>
@@ -133,7 +159,8 @@ export default class TableDetail extends React.Component {
           </thead>
           <TableBody
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
-            onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged}/>
+            onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumn={this.state.sortColumn}
+            sortOrder={this.state.sortOrder}/>
         </table>
         <button onClick={this.addNewRow} className="btn btn-primary btn-sm">+</button>
       </div>

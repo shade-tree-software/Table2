@@ -21,7 +21,13 @@ export default class TableBody extends React.Component {
     })
     return (
       <tbody>
-      {Object.entries(rows).map(([rowId, rowData]) => {
+      {Object.entries(rows).sort(([, rowDataA],[, rowDataB]) => {
+        let a = rowDataA[this.props.sortColumn] ? rowDataA[this.props.sortColumn].cellText : ''
+        let b = rowDataB[this.props.sortColumn] ? rowDataB[this.props.sortColumn].cellText : ''
+        if (a < b) {return this.props.sortOrder === 'asc' ? -1 : 1;}
+        if (a > b) {return this.props.sortOrder === 'asc' ? 1 : -1;}
+        return 0;
+      }).map(([rowId, rowData]) =>{
         return (
           <tr className="stackable" key={rowId}>{this.props.columns.map((column, index) => (
             <TableCell key={index}
