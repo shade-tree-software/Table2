@@ -8,6 +8,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "babel-preset-stage-3": "^6.24.1",
     "bcrypt": "^1.0.3",
     "foreman": "^2.0.0",
     "gulp": "^3.9.1",
@@ -28,8 +29,5 @@
     "postinstall": "react-scripts build && gulp server",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
-  },
-  "devDependencies": {
-    "babel-preset-stage-3": "^6.24.1"
   }
 }
