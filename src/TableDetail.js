@@ -40,7 +40,7 @@ export default class TableDetail extends React.Component {
   }
 
   getTableDetails = () => {
-    fetch('/api/tables/' + this.props.match.params._id + '?token=' + sessionStorage.authToken).then((response) => {
+    fetch('/api/tables/' + this.props.match.params._id + '?token=' + localStorage.authToken).then((response) => {
       return response.json()
     }).then((tableData) => {
       this.setState(tableData)
@@ -48,7 +48,7 @@ export default class TableDetail extends React.Component {
   }
 
   addNewRow = (e) => {
-    fetch(`/api/tables/${this.props.match.params._id}/rows?token=${sessionStorage.authToken}`, {
+    fetch(`/api/tables/${this.props.match.params._id}/rows?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -90,7 +90,7 @@ export default class TableDetail extends React.Component {
   }
 
   deleteColumn = (columnName) => {
-    fetch(`/api/tables/${this.props.match.params._id}/columns/${encodeURIComponent(columnName)}?token=${sessionStorage.authToken}`, {
+    fetch(`/api/tables/${this.props.match.params._id}/columns/${encodeURIComponent(columnName)}?token=${localStorage.authToken}`, {
       method: 'delete',
     }).then(() => {
       let index = this.state.columns.findIndex((elem) => (elem.columnName === columnName))
@@ -99,7 +99,7 @@ export default class TableDetail extends React.Component {
   }
 
   insertColumn = (columnName, position) => {
-    fetch(`/api/tables/${this.props.match.params._id}/columns?token=${sessionStorage.authToken}`, {
+    fetch(`/api/tables/${this.props.match.params._id}/columns?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
       },

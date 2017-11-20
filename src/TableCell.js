@@ -11,7 +11,7 @@ export default class TableCell extends React.Component {
 
   okHandler = (cellValue) => {
     this.setState({editing: false})
-    fetch(`/api/tables/${this.props.tableId}/rows/${this.props.rowId}?token=${sessionStorage.authToken}`, {
+    fetch(`/api/tables/${this.props.tableId}/rows/${this.props.rowId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
       },

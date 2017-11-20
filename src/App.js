@@ -18,14 +18,14 @@ class App extends Component {
           <Route path="/" component={NavBar}/>
           <div className="container">
             <Route exact path="/" render={(props) => (
-              sessionStorage.authToken ? <MainPage {...props}/> : <Redirect to="/login"/> )}/>
+              localStorage.authToken ? <MainPage {...props}/> : <Redirect to="/login"/> )}/>
             <Route path="/login" component={LoginForm}/>
             <Route path="/main" render={(props) => (
-              sessionStorage.authToken ? <MainPage {...props}/> : <Redirect to="/login"/> )}/>
+              localStorage.authToken ? <MainPage {...props}/> : <Redirect to="/login"/> )}/>
             <Route path="/about" render={() => (
-              sessionStorage.authToken ? <About/> : <Redirect to="/login"/> )}/>
+              localStorage.authToken ? <About/> : <Redirect to="/login"/> )}/>
             <Route path="/tables/:_id" render={(props) => (
-              sessionStorage.authToken ? <TableDetail {...props}/> : <Redirect to="/login"/>)}/>
+              localStorage.authToken ? <TableDetail {...props}/> : <Redirect to="/login"/>)}/>
           </div>
         </div>
       </Router>

@@ -19,7 +19,7 @@ export default class MainPage extends React.Component {
   }
 
   getTables = () => {
-    fetch('api/tables?token=' + sessionStorage.authToken).then((response) => {
+    fetch('api/tables?token=' + localStorage.authToken).then((response) => {
       return response.json()
     }).then((data) => {
       this.setState({tables: data})
@@ -27,7 +27,7 @@ export default class MainPage extends React.Component {
   }
 
   addNewTable = (tableName) => {
-    fetch('api/tables?token=' + sessionStorage.authToken, {
+    fetch('api/tables?token=' + localStorage.authToken, {
       headers: {
         'Content-Type': 'application/json'
       },
@@ -37,7 +37,7 @@ export default class MainPage extends React.Component {
   }
 
   deleteTable = (_id) => {
-    fetch('api/tables/' + _id + '?token=' + sessionStorage.authToken, {
+    fetch('api/tables/' + _id + '?token=' + localStorage.authToken, {
       headers: {
         'Content-Type': 'application/json'
       },

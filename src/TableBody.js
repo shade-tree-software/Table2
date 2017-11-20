@@ -4,7 +4,7 @@ import TableCell from './TableCell'
 
 export default class TableBody extends React.Component {
   onDeleteRowClick = (e, rowId) => {
-    fetch(`/api/tables/${this.props.tableId}/rows/${rowId}?token=${sessionStorage.authToken}`, {
+    fetch(`/api/tables/${this.props.tableId}/rows/${rowId}?token=${localStorage.authToken}`, {
       method: 'delete',
     }).then(this.props.onRowDeleted(rowId))
   }

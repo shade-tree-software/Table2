@@ -20,7 +20,7 @@ export default class LoginForm extends React.Component {
     }).then((response) => {
       return response.json()
     }).then((data) => {
-      sessionStorage.authToken = data.token
+      localStorage.authToken = data.token
       this.props.history.push('/main')
     })
   }
