@@ -144,9 +144,9 @@ export default class TableDetail extends React.Component {
 
   onCellChanged = (cell) => {
     this.setState((prevState) => {
-      let index = this.state.cells.findIndex((elem) => (elem._id === cell._id))
+      let index = prevState.cells.findIndex((elem) => (elem._id === cell._id))
       if (index >= 0) {
-        return ({cells: [...prevState.cells.slice(0, index), cell, ...prevState.cells.slice(index)]})
+        return ({cells: [...prevState.cells.slice(0, index), cell, ...prevState.cells.slice(index + 1)]})
       } else {
         return ({cells: [...prevState.cells, cell]})
       }

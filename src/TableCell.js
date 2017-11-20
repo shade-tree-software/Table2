@@ -21,7 +21,7 @@ export default class TableCell extends React.Component {
       return response.json()
     }).then((cellInfo) => {
       this.props.onCellChanged({
-        _id: cellInfo.cellId,
+        _id: cellInfo.cellId || this.props.cellId,
         value: cellValue,
         rowId: this.props.rowId,
         columnName: this.props.column.columnName
