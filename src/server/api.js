@@ -74,9 +74,7 @@ export default function (db) {
       db.collection('tables').findOne(filter).then(function (table) {
         let rowIds = table.rows.map((row) => ( row.rowId ))
         db.collection('cells').find({rowId: {$in: rowIds}}).toArray().then(function (cells) {
-          res.send({
-            rows: table.rows, columns: table.columns || [], cells, tableName: table.tableName, tableId: table._id
-          })
+          res.send({rows: [], columns: [], ...table, cells})
         }).catch(function (err) {
           console.log(err.stack)
         })
@@ -87,7 +85,7 @@ export default function (db) {
     // Set the value of a particular field in a table
     .put(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
-      let update = {$set: {[req.body.name]: req.body.value}}
+      let update = {$set: req.body.values}
       db.collection('tables').updateOne(filter, update).then(function () {
         res.sendStatus(200)
       }).catch(function (err) {

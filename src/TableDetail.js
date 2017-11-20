@@ -43,7 +43,7 @@ export default class TableDetail extends React.Component {
     fetch('/api/tables/' + this.props.match.params._id + '?token=' + localStorage.authToken).then((response) => {
       return response.json()
     }).then((tableData) => {
-      this.setState(tableData)
+      this.setState({...tableData, tableId: tableData._id})
     })
   }
 
@@ -62,6 +62,18 @@ export default class TableDetail extends React.Component {
     })
   }
 
+  setSortCriteria = (sortColumn, sortOrder) => {
+    fetch(`/api/tables/${this.state.tableId}?token=${localStorage.authToken}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'put',
+      body: JSON.stringify({values: {sortColumn, sortOrder}})
+    }).then(() => {
+      this.setState({sortColumn, sortOrder})
+    })
+  }
+
   onContextMenuItemClick = (e, data, target) => {
     if (data.command === 'delete') {
       this.deleteColumn(target.getAttribute('column-name'))
@@ -69,9 +81,9 @@ export default class TableDetail extends React.Component {
       this.setState({insertColumnPosition: target.getAttribute('index')})
       this.showModal()
     } else if (data.command === 'sort-asc') {
-      this.setState({sortColumn: target.getAttribute('column-name'), sortOrder: 'asc'})
+      this.setSortCriteria(target.getAttribute('column-name'), 'asc')
     } else if (data.command === 'sort-desc') {
-      this.setState({sortColumn: target.getAttribute('column-name'), sortOrder: 'desc'})
+      this.setSortCriteria(target.getAttribute('column-name'), 'desc')
     } else if (data.command === 'hide') {
       let columnIndex = this.state.columns.findIndex((column) => (column.columnName === target.getAttribute('column-name')))
       let newColumn = {columnName: target.getAttribute('column-name'), hiddenOnMobile: true}

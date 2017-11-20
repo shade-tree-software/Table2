@@ -28,5 +28,8 @@
     "postinstall": "react-scripts build && gulp server",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "babel-preset-stage-3": "^6.24.1"
   }
 }
