@@ -165,6 +165,17 @@ export default function (db) {
     })
 
   api.route('/tables/:_id/columns/:columnName')
+  // Update a column field
+    .put(function (req, res) {
+      let filter = {_id: new mongodb.ObjectID(req.params._id), 'columns.columnName': req.params.columnName}
+      let fieldQuery = `columns.$.${req.body.fieldName}`
+      let update = {$set: { [fieldQuery] : req.body.fieldValue }}
+      db.collection('tables').update(filter, update).then(function () {
+        res.sendStatus(200)
+      }).catch(function (err) {
+        console.log(err.stack)
+      })
+    })
   // Delete a column
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}

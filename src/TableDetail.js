@@ -74,6 +74,22 @@ export default class TableDetail extends React.Component {
     })
   }
 
+  changeColumnVisibility = (columnName, hiddenOnMobile) => {
+    fetch(`/api/tables/${this.state.tableId}/columns/${columnName}?token=${localStorage.authToken}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      method: 'put',
+      body: JSON.stringify({fieldName: 'hiddenOnMobile', fieldValue: hiddenOnMobile})
+    }).then(() => {
+      let columnIndex = this.state.columns.findIndex((column) => (column.columnName === columnName))
+      let newColumn = {columnName, hiddenOnMobile}
+      this.setState((prevState) => {
+        return ({columns: [...prevState.columns.slice(0, columnIndex), newColumn, ...prevState.columns.slice(columnIndex + 1)]});
+      })
+    })
+  }
+
   onContextMenuItemClick = (e, data, target) => {
     if (data.command === 'delete') {
       this.deleteColumn(target.getAttribute('column-name'))
@@ -85,19 +101,15 @@ export default class TableDetail extends React.Component {
     } else if (data.command === 'sort-desc') {
       this.setSortCriteria(target.getAttribute('column-name'), 'desc')
     } else if (data.command === 'hide') {
-      let columnIndex = this.state.columns.findIndex((column) => (column.columnName === target.getAttribute('column-name')))
-      let newColumn = {columnName: target.getAttribute('column-name'), hiddenOnMobile: true}
-      this.setState((prevState) => ({columns: [...prevState.columns.slice(0, columnIndex), newColumn, ...prevState.columns.slice(columnIndex + 1)]}))
+      this.changeColumnVisibility(target.getAttribute('column-name'), true)
     }
   }
 
-  showHiddenFields = () => {
-    this.setState((prevState) => {
-      let columns = []
-      prevState.columns.forEach((column) => {
-        columns.push({columnName: column.columnName, hiddenOnMobile: false})
-      })
-      return {columns}
+  showHiddenColumns = () => {
+    this.state.columns.forEach((column) => {
+      if (column.hiddenOnMobile === true) {
+        this.changeColumnVisibility(column.columnName, false)
+      }
     })
   }
 
@@ -191,7 +203,7 @@ export default class TableDetail extends React.Component {
           <TableBody
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
             onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumn={this.state.sortColumn}
-            sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenFields}/>
+            sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns}/>
         </table>
         <button onClick={this.addNewRow} className="btn btn-primary btn-sm">+</button>
       </div>
