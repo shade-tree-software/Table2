@@ -3,28 +3,8 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import bodyParser from 'body-parser'
 import mongodb from 'mongodb'
-import crypto from 'crypto'
-
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY; // Must be 256 bytes (32 characters)
-const IV_LENGTH = 16; // For AES, this is always 16
-
-function encrypt(text) {
-  let iv = crypto.randomBytes(IV_LENGTH);
-  let cipher = crypto.createCipheriv('aes-256-cbc', new Buffer(ENCRYPTION_KEY), iv);
-  let encrypted = cipher.update(text);
-  encrypted = Buffer.concat([encrypted, cipher.final()]);
-  return iv.toString('hex') + ':' + encrypted.toString('hex');
-}
-
-function decrypt(text) {
-  let textParts = text.split(':');
-  let iv = new Buffer(textParts.shift(), 'hex');
-  let encryptedText = new Buffer(textParts.join(':'), 'hex');
-  let decipher = crypto.createDecipheriv('aes-256-cbc', new Buffer(ENCRYPTION_KEY), iv);
-  let decrypted = decipher.update(encryptedText);
-  decrypted = Buffer.concat([decrypted, decipher.final()]);
-  return decrypted.toString();
-}
+import Crypt from './Crypt'
+import co from 'co'
 
 export default function (db) {
 
@@ -32,6 +12,10 @@ export default function (db) {
 
   api.use(bodyParser.urlencoded({extended: false}))
   api.use(bodyParser.json())
+
+  function onError(err) {
+    console.log(err.stack)
+  }
 
   // Get authentication token
   api.post('/authenticate', function (req, res) {
@@ -91,18 +75,14 @@ export default function (db) {
   api.route('/tables/:_id')
   // Get the complete contents of a specific table
     .get(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params._id)}
-      db.collection('tables').findOne(filter).then(function (table) {
+      co(function* () {
+        let filter = {_id: new mongodb.ObjectID(req.params._id)}
+        let table = yield db.collection('tables').findOne(filter)
         let rowIds = table.rows ? table.rows.map((row) => ( row.rowId )) : []
-        db.collection('cells').find({rowId: {$in: rowIds}}).toArray().then(function (cells) {
-          let decryptedCells = cells.map((cell) => ({...cell, value: decrypt(cell.value)}))
-          res.send({rows: [], columns: [], ...table, cells: decryptedCells})
-        }).catch(function (err) {
-          console.log(err.stack)
-        })
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+        let cells = yield db.collection('cells').find({rowId: {$in: rowIds}}).toArray()
+        let decryptedCells = cells.map((cell) => ({...cell, value: Crypt.decrypt(cell.value)}))
+        res.send({rows: [], columns: [], ...table, cells: decryptedCells})
+      }).catch(onError);
     })
     // Set the value of a particular field in a table
     .put(function (req, res) {
@@ -110,18 +90,14 @@ export default function (db) {
       let update = {$set: req.body.values}
       db.collection('tables').updateOne(filter, update).then(function () {
         res.sendStatus(200)
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+      }).catch(onError)
     })
     // Delete a table
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params._id)}
       db.collection('tables').deleteOne(filter).then(function () {
         res.sendStatus(200)
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+      }).catch(onError)
     })
 
   api.route('/tables/:_id/columns')
@@ -137,9 +113,7 @@ export default function (db) {
       }
       db.collection('tables').updateOne(filter, update).then(function () {
         res.sendStatus(200)
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+      }).catch(onError)
     })
 
   api.route('/tables/:_id/rows')
@@ -150,9 +124,7 @@ export default function (db) {
       let update = {$push: {rows: {rowId}}}
       db.collection('tables').updateOne(filter, update).then(function () {
         res.send({rowId})
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+      }).catch(onError)
     })
 
   api.route('/tables/:tableId/rows/:rowId')
@@ -162,28 +134,22 @@ export default function (db) {
       let update = {
         rowId: new mongodb.ObjectID(req.params.rowId),
         columnName: req.body.columnName,
-        value: encrypt(req.body.cellValue)
+        value: Crypt.encrypt(req.body.cellValue)
       }
       db.collection('cells').updateOne(filter, update, {upsert: true}).then(function (r) {
         res.send({cellId: r.upsertedId ? r.upsertedId._id : null})
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+      }).catch(onError)
     })
     // Delete a row
     .delete(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
-      let update = {$pull: {rows: {rowId: new mongodb.ObjectID(req.params.rowId)}}}
-      db.collection('tables').updateOne(filter, update).then(function () {
+      co(function* () {
+        let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
+        let update = {$pull: {rows: {rowId: new mongodb.ObjectID(req.params.rowId)}}}
+        yield db.collection('tables').updateOne(filter, update)
         filter = {rowId: new mongodb.ObjectID(req.params.rowId)}
-        db.collection('cells').deleteMany(filter).then(function () {
-          res.sendStatus(200)
-        }).catch(function (err) {
-          console.log(err.stack)
-        })
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+        yield db.collection('cells').deleteMany(filter)
+        res.sendStatus(200)
+      }).catch(onError);
     })
 
   api.route('/tables/:_id/columns/:columnName')
@@ -194,24 +160,18 @@ export default function (db) {
       let update = {$set: {[fieldQuery]: req.body.fieldValue}}
       db.collection('tables').update(filter, update).then(function () {
         res.sendStatus(200)
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+      }).catch(onError)
     })
     // Delete a column
     .delete(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params._id)}
-      let update = {$pull: {columns: {columnName: req.params.columnName}}}
-      db.collection('tables').updateOne(filter, update).then(function () {
+      co(function* () {
+        let filter = {_id: new mongodb.ObjectID(req.params._id)}
+        let update = {$pull: {columns: {columnName: req.params.columnName}}}
+        yield db.collection('tables').updateOne(filter, update)
         filter = {columnName: req.params.columnName}
-        db.collection('cells').deleteMany(filter).then(function () {
-          res.sendStatus(200)
-        }).catch(function (err) {
-          console.log(err.stack)
-        })
-      }).catch(function (err) {
-        console.log(err.stack)
-      })
+        yield db.collection('cells').deleteMany(filter)
+        res.sendStatus(200)
+      }).catch(onError);
     })
   return api
 }

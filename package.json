@@ -5,11 +5,13 @@
     "node": "8"
   },
   "proxy": "http://localhost:9000",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "dependencies": {
     "babel-preset-stage-3": "^6.24.1",
+    "babel-runtime": "^6.26.0",
     "bcrypt": "^1.0.3",
+    "co": "^4.6.0",
     "crypto": "^1.0.1",
     "foreman": "^2.0.0",
     "gulp": "^3.9.1",
@@ -30,5 +32,8 @@
     "postinstall": "react-scripts build && gulp server",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-runtime": "^6.23.0"
   }
 }
