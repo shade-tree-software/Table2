@@ -72,11 +72,11 @@ export default function (db) {
       })
     })
 
-  api.route('/tables/:_id')
+  api.route('/tables/:tableId')
   // Get the complete contents of a specific table
     .get(function (req, res) {
       co(function* () {
-        let filter = {_id: new mongodb.ObjectID(req.params._id)}
+        let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
         let table = yield db.collection('tables').findOne(filter)
         let rowIds = table.rows ? table.rows.map((row) => ( row.rowId )) : []
         let cells = yield db.collection('cells').find({rowId: {$in: rowIds}}).toArray()
@@ -86,7 +86,7 @@ export default function (db) {
     })
     // Set the value of a particular field in a table
     .put(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params._id)}
+      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       let update = {$set: req.body.values}
       db.collection('tables').updateOne(filter, update).then(function () {
         res.sendStatus(200)
@@ -94,32 +94,40 @@ export default function (db) {
     })
     // Delete a table
     .delete(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params._id)}
+      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       db.collection('tables').deleteOne(filter).then(function () {
         res.sendStatus(200)
       }).catch(onError)
     })
 
-  api.route('/tables/:_id/columns')
+  api.route('/tables/:tableId/columns')
   // Add or insert a new column into a table
     .post(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params._id)}
+      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       let update
+      let columnId = new mongodb.ObjectID()
       if (req.body.position) {
         let position = parseInt(req.body.position)
-        update = {$push: {columns: {$each: [{columnName: req.body.columnName}], $position: position}}}
+        update = {
+          $push: {
+            columns: {
+              $each: [{columnName: req.body.columnName, columnId}],
+              $position: position
+            }
+          }
+        }
       } else {
-        update = {$push: {columns: {columnName: req.body.columnName}}}
+        update = {$push: {columns: {columnName: req.body.columnName, columnId}}}
       }
       db.collection('tables').updateOne(filter, update).then(function () {
-        res.sendStatus(200)
+        res.send({columnId})
       }).catch(onError)
     })
 
-  api.route('/tables/:_id/rows')
+  api.route('/tables/:tableId/rows')
   // Add a new row to a table
     .post(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params._id)}
+      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       let rowId = new mongodb.ObjectId()
       let update = {$push: {rows: {rowId}}}
       db.collection('tables').updateOne(filter, update).then(function () {
@@ -128,19 +136,7 @@ export default function (db) {
     })
 
   api.route('/tables/:tableId/rows/:rowId')
-  // Set the value of a table cell
-    .put(function (req, res) {
-      let filter = {rowId: new mongodb.ObjectID(req.params.rowId), columnName: req.body.columnName}
-      let update = {
-        rowId: new mongodb.ObjectID(req.params.rowId),
-        columnName: req.body.columnName,
-        value: Crypt.encrypt(req.body.cellValue)
-      }
-      db.collection('cells').updateOne(filter, update, {upsert: true}).then(function (r) {
-        res.send({cellId: r.upsertedId ? r.upsertedId._id : null})
-      }).catch(onError)
-    })
-    // Delete a row
+  // Delete a row
     .delete(function (req, res) {
       co(function* () {
         let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
@@ -152,10 +148,25 @@ export default function (db) {
       }).catch(onError);
     })
 
-  api.route('/tables/:_id/columns/:columnName')
+  api.route('/tables/:tableId/rows/:rowId/columns/:columnId')
+  // Set the value of a table cell
+    .put(function (req, res) {
+      let rowId = new mongodb.ObjectID(req.params.rowId)
+      let columnId = new mongodb.ObjectID(req.params.columnId)
+      let filter = {rowId, columnId}
+      let update = {rowId, columnId, value: Crypt.encrypt(req.body.cellValue)
+      }
+      db.collection('cells').updateOne(filter, update, {upsert: true}).then(function (r) {
+        res.send({cellId: r.upsertedId ? r.upsertedId._id : null})
+      }).catch(onError)
+    })
+
+
+  api.route('/tables/:tableId/columns/:columnId')
   // Update a column field
     .put(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params._id), 'columns.columnName': req.params.columnName}
+      let columnId = new mongodb.ObjectID(req.params.columnId)
+      let filter = {_id: new mongodb.ObjectID(req.params.tableId), 'columns.columnId': columnId}
       let fieldQuery = `columns.$.${req.body.fieldName}`
       let update = {$set: {[fieldQuery]: req.body.fieldValue}}
       db.collection('tables').update(filter, update).then(function () {
@@ -165,11 +176,11 @@ export default function (db) {
     // Delete a column
     .delete(function (req, res) {
       co(function* () {
-        let filter = {_id: new mongodb.ObjectID(req.params._id)}
-        let update = {$pull: {columns: {columnName: req.params.columnName}}}
+        let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
+        let columnId = new mongodb.ObjectID(req.params.columnId)
+        let update = {$pull: {columns: {columnId}}}
         yield db.collection('tables').updateOne(filter, update)
-        filter = {columnName: req.params.columnName}
-        yield db.collection('cells').deleteMany(filter)
+        yield db.collection('cells').deleteMany({columnId})
         res.sendStatus(200)
       }).catch(onError);
     })

@@ -11,12 +11,12 @@ export default class TableCell extends React.Component {
 
   okHandler = (cellValue) => {
     this.setState({editing: false})
-    fetch(`/api/tables/${this.props.tableId}/rows/${this.props.rowId}?token=${localStorage.authToken}`, {
+    fetch(`/api/tables/${this.props.tableId}/rows/${this.props.rowId}/columns/${this.props.column.columnId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
       },
       method: 'put',
-      body: JSON.stringify({columnName: this.props.column.columnName, cellValue})
+      body: JSON.stringify({cellValue})
     }).then((response) => {
       return response.json()
     }).then((cellInfo) => {
@@ -24,7 +24,7 @@ export default class TableCell extends React.Component {
         _id: cellInfo.cellId || this.props.cellId,
         value: cellValue,
         rowId: this.props.rowId,
-        columnName: this.props.column.columnName
+        columnId: this.props.column.columnId
       })
     })
   }
@@ -49,7 +49,7 @@ export default class TableCell extends React.Component {
     } else {
       return (
         <td onClick={this.onCellClick} className={this.props.column.hiddenOnMobile ? 'large-only' : ''}>
-          <ContextMenuTrigger attributes={{'column-name': this.props.column.columnName}}
+          <ContextMenuTrigger attributes={{'column-id': this.props.column.columnId}}
                               id="mobile-field-context-menu">
             <span className="small-only bold-text">{this.props.column.columnName}: </span>{this.props.text}
           </ContextMenuTrigger>

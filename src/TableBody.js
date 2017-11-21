@@ -16,7 +16,7 @@ export default class TableBody extends React.Component {
     })
     this.props.cells.forEach((cell) => {
       if (rows[cell.rowId]) {
-        rows[cell.rowId][cell.columnName] = {cellId: cell._id, cellText: cell.value}
+        rows[cell.rowId][cell.columnId] = {cellId: cell._id, cellText: cell.value}
       }
     })
     let hiddenColumns = false
@@ -28,8 +28,8 @@ export default class TableBody extends React.Component {
     return (
       <tbody>
       {Object.entries(rows).sort(([, rowDataA], [, rowDataB]) => {
-        let a = rowDataA[this.props.sortColumn] ? rowDataA[this.props.sortColumn].cellText : ''
-        let b = rowDataB[this.props.sortColumn] ? rowDataB[this.props.sortColumn].cellText : ''
+        let a = rowDataA[this.props.sortColumnId] ? rowDataA[this.props.sortColumnId].cellText : ''
+        let b = rowDataB[this.props.sortColumnId] ? rowDataB[this.props.sortColumnId].cellText : ''
         if (a < b) {
           return this.props.sortOrder === 'asc' ? -1 : 1;
         }
@@ -44,8 +44,8 @@ export default class TableBody extends React.Component {
                        tableId={this.props.tableId}
                        rowId={rowId}
                        column={column}
-                       text={rowData[column.columnName] ? rowData[column.columnName].cellText : ''}
-                       cellId={rowData[column.columnName] ? rowData[column.columnName].cellId : null}
+                       text={rowData[column.columnId] ? rowData[column.columnId].cellText : ''}
+                       cellId={rowData[column.columnId] ? rowData[column.columnId].cellId : null}
                        onCellChanged={this.props.onCellChanged}/>
           ))}
             <td>

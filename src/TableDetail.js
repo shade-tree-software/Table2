@@ -17,7 +17,7 @@ export default class TableDetail extends React.Component {
       tableName: '',
       tableId: '',
       isShowingModal: false,
-      sortColumn: '',
+      sortColumnId: '',
       sortOrder: 'asc'
     }
   }
@@ -62,62 +62,62 @@ export default class TableDetail extends React.Component {
     })
   }
 
-  setSortCriteria = (sortColumn, sortOrder) => {
+  setSortCriteria = (sortColumnId, sortOrder) => {
     fetch(`/api/tables/${this.state.tableId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
       },
       method: 'put',
-      body: JSON.stringify({values: {sortColumn, sortOrder}})
+      body: JSON.stringify({values: {sortColumnId, sortOrder}})
     }).then(() => {
-      this.setState({sortColumn, sortOrder})
+      this.setState({sortColumnId, sortOrder})
     })
   }
 
-  changeColumnVisibility = (columnName, hiddenOnMobile) => {
-    fetch(`/api/tables/${this.state.tableId}/columns/${columnName}?token=${localStorage.authToken}`, {
+  changeColumnVisibility = (columnId, hiddenOnMobile) => {
+    fetch(`/api/tables/${this.state.tableId}/columns/${columnId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
       },
       method: 'put',
       body: JSON.stringify({fieldName: 'hiddenOnMobile', fieldValue: hiddenOnMobile})
     }).then(() => {
-      let columnIndex = this.state.columns.findIndex((column) => (column.columnName === columnName))
-      let newColumn = {columnName, hiddenOnMobile}
       this.setState((prevState) => {
-        return ({columns: [...prevState.columns.slice(0, columnIndex), newColumn, ...prevState.columns.slice(columnIndex + 1)]});
+        let columnIndex = prevState.columns.findIndex((column) => (column.columnId === columnId))
+        let modifiedColumn = {columnId: columnId, hiddenOnMobile, columnName: prevState.columns[columnIndex].columnName}
+        return ({columns: [...prevState.columns.slice(0, columnIndex), modifiedColumn, ...prevState.columns.slice(columnIndex + 1)]});
       })
     })
   }
 
   onContextMenuItemClick = (e, data, target) => {
     if (data.command === 'delete') {
-      this.deleteColumn(target.getAttribute('column-name'))
+      this.deleteColumn(target.getAttribute('column-id'))
     } else if (data.command === 'insert') {
       this.setState({insertColumnPosition: target.getAttribute('index')})
       this.showModal()
     } else if (data.command === 'sort-asc') {
-      this.setSortCriteria(target.getAttribute('column-name'), 'asc')
+      this.setSortCriteria(target.getAttribute('column-id'), 'asc')
     } else if (data.command === 'sort-desc') {
-      this.setSortCriteria(target.getAttribute('column-name'), 'desc')
+      this.setSortCriteria(target.getAttribute('column-id'), 'desc')
     } else if (data.command === 'hide') {
-      this.changeColumnVisibility(target.getAttribute('column-name'), true)
+      this.changeColumnVisibility(target.getAttribute('column-id'), true)
     }
   }
 
   showHiddenColumns = () => {
     this.state.columns.forEach((column) => {
       if (column.hiddenOnMobile === true) {
-        this.changeColumnVisibility(column.columnName, false)
+        this.changeColumnVisibility(column.columnId, false)
       }
     })
   }
 
-  deleteColumn = (columnName) => {
-    fetch(`/api/tables/${this.props.match.params._id}/columns/${encodeURIComponent(columnName)}?token=${localStorage.authToken}`, {
+  deleteColumn = (columnId) => {
+    fetch(`/api/tables/${this.props.match.params._id}/columns/${columnId}?token=${localStorage.authToken}`, {
       method: 'delete',
     }).then(() => {
-      let index = this.state.columns.findIndex((elem) => (elem.columnName === columnName))
+      let index = this.state.columns.findIndex((elem) => (elem.columnId === columnId))
       this.setState((prevState) => ({columns: [...prevState.columns.slice(0, index), ...prevState.columns.slice(index + 1)]}))
     })
   }
@@ -129,10 +129,12 @@ export default class TableDetail extends React.Component {
       },
       method: 'post',
       body: JSON.stringify({columnName, position})
-    }).then(() => {
+    }).then((response) => {
+      return response.json()
+    }).then((columnInfo) => {
       this.setState((prevState) => {
         position = position || prevState.columns.length
-        return ({columns: [...prevState.columns.slice(0, position), {columnName}, ...prevState.columns.slice(position)]})
+        return ({columns: [...prevState.columns.slice(0, position), {columnName, columnId: columnInfo.columnId}, ...prevState.columns.slice(position)]})
       })
     })
   }
@@ -153,8 +155,8 @@ export default class TableDetail extends React.Component {
     })
   }
 
-  sortLegend = (columnName) => {
-    if (columnName === this.state.sortColumn) {
+  sortLegend = (columnId) => {
+    if (columnId === this.state.sortColumnId) {
       return this.state.sortOrder === 'asc' ? <span> &#x25B2;</span> : <span> &#x25BC;</span>
     }
   }
@@ -166,7 +168,7 @@ export default class TableDetail extends React.Component {
                style={{content: {display: 'inline-block', right: 'unset', bottom: 'unset'}}}>
           <TextBoxForm onOk={this.okModal} onCancel={this.cancelModal} placeholder='Column Name'/>
         </Modal>
-        <ContextMenu id="column-name-context-menu">
+        <ContextMenu id="column-header-context-menu">
           <MenuItem data={{command: 'sort-asc'}} onClick={this.onContextMenuItemClick}>
             Sort Column Ascending
           </MenuItem>
@@ -192,9 +194,9 @@ export default class TableDetail extends React.Component {
           <tr className="large-only">
             {this.state.columns.map((column, index) =>
               <th key={index}>
-                <ContextMenuTrigger attributes={{'column-name': column.columnName, index: index}}
-                                    id="column-name-context-menu">{column.columnName}
-                  {this.sortLegend(column.columnName)}</ContextMenuTrigger>
+                <ContextMenuTrigger attributes={{'column-id': column.columnId, index: index}}
+                                    id="column-header-context-menu">{column.columnName}
+                  {this.sortLegend(column.columnId)}</ContextMenuTrigger>
               </th>
             )}
             <th><AddColumnButton insertColumn={this.insertColumn}/></th>
@@ -202,7 +204,7 @@ export default class TableDetail extends React.Component {
           </thead>
           <TableBody
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
-            onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumn={this.state.sortColumn}
+            onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumnId={this.state.sortColumnId}
             sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns}/>
         </table>
         <button onClick={this.addNewRow} className="btn btn-primary btn-sm">+</button>
