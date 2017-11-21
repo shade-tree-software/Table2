@@ -22,3 +22,19 @@
 .bold-text {
   font-weight: bold;
 }
+
+.row-color-week1 {
+  background-color: lightgreen !important;
+}
+.row-color-week2 {
+  background-color: mediumseagreen !important;
+}
+.row-color-week3 {
+  background-color: violet !important;
+}
+.row-color-invalid {
+  background-color: lightpink !important;
+}
+.row-color-na {
+  background-color: lightblue !important;
+}

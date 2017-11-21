@@ -9,6 +9,25 @@ export default class TableBody extends React.Component {
     }).then(this.props.onRowDeleted(rowId))
   }
 
+  rowColor = (sortDateText) => {
+    console.log(sortDateText)
+    if (sortDateText === 'deleted' || sortDateText === 'unknown') {
+      return 'row-color-na'
+    }
+    let sortDate = new Date(sortDateText)
+    if (sortDate.toString() === 'Invalid Date') {
+      return 'row-color-invalid'
+    } else if (((new Date()) - sortDate) > 604800000 * 3) {
+      return 'row-color-week3'
+    } else if (((new Date()) - sortDate) > 604800000 * 2) {
+      return 'row-color-week2'
+    } else if (((new Date()) - sortDate) > 604800000) {
+      return 'row-color-week1'
+    } else {
+      return ''
+    }
+  }
+
   render() {
     let rows = {}
     this.props.rows.forEach((row) => {
@@ -25,23 +44,46 @@ export default class TableBody extends React.Component {
       if (column.hiddenOnMobile) {
         hiddenColumns = true
       }
-      if (column.columnId === this.props.sortColumnId && column.columnName.toLowerCase().includes('date')){
+      if (column.columnId === this.props.sortColumnId && column.columnName.toLowerCase().includes('date')) {
         sortingByDate = true
       }
     })
-    let tableRows = Object.entries(rows).sort(([, rowDataA], [, rowDataB]) => {
-      let a = rowDataA[this.props.sortColumnId] ? rowDataA[this.props.sortColumnId].cellText : ''
-      let b = rowDataB[this.props.sortColumnId] ? rowDataB[this.props.sortColumnId].cellText : ''
-      if (sortingByDate ? new Date(a) < new Date(b) : a < b) {
+    let sortedRows = Object.entries(rows).sort(([, rowDataA], [, rowDataB]) => {
+      let a, b
+      if (sortingByDate) {
+        let textA = rowDataA[this.props.sortColumnId].cellText
+        let textB = rowDataB[this.props.sortColumnId].cellText
+        let dateA = new Date(textA)
+        let dateB = new Date(textB)
+        let dateAisValid = dateA.toString() !== 'Invalid Date'
+        let dateBisValid = dateB.toString() !== 'Invalid Date'
+        if (dateAisValid && dateBisValid) {
+          a = dateA
+          b = dateB
+        } else if (!dateAisValid && !dateBisValid) {
+          a = textA
+          b = textB
+        } else {
+          a = dateAisValid ? dateA : new Date(0)
+          b = dateBisValid ? dateB : new Date(0)
+        }
+      } else {
+        a = rowDataA[this.props.sortColumnId] ? rowDataA[this.props.sortColumnId].cellText : ''
+        b = rowDataB[this.props.sortColumnId] ? rowDataB[this.props.sortColumnId].cellText : ''
+      }
+      if (a < b) {
         return this.props.sortOrder === 'asc' ? -1 : 1;
       }
-      if (sortingByDate ? new Date(a) > new Date(b) : a > b) {
+      if (a > b) {
         return this.props.sortOrder === 'asc' ? 1 : -1;
       }
       return 0;
-    }).map(([rowId, rowData]) => {
+    })
+    let htmlRows = sortedRows.map(([rowId, rowData]) => {
+      let sortDateText = sortingByDate && rowData[this.props.sortColumnId] ? rowData[this.props.sortColumnId].cellText : ''
       return (
-        <tr className="stackable" key={rowId}>{this.props.columns.map((column, index) => (
+        <tr className={`stackable ${this.rowColor(sortDateText)}`}
+            key={rowId}>{this.props.columns.map((column, index) => (
           <TableCell key={index}
                      tableId={this.props.tableId}
                      rowId={rowId}
@@ -60,7 +102,7 @@ export default class TableBody extends React.Component {
       )
     })
     return (
-      <tbody>{tableRows}</tbody>
+      <tbody>{htmlRows}</tbody>
     )
   }
 }
