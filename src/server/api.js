@@ -81,10 +81,15 @@ export default function (db) {
         let rowIds = table.rows ? table.rows.map((row) => ( row.rowId )) : []
         let cells = yield db.collection('cells').find({rowId: {$in: rowIds}}).toArray()
         let decryptedCells = cells.map((cell) => ({...cell, value: Crypt.decrypt(cell.value)}))
+        if (table.columns) {
+          table.columns.forEach(function (column) {
+            column.columnName = Crypt.decrypt(column.columnName)
+          })
+        }
         res.send({rows: [], columns: [], ...table, cells: decryptedCells})
       }).catch(onError);
     })
-    // Set the value of a particular field in a table
+    // Set the value of a particular field in a top-level 'table' document
     .put(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       let update = {$set: req.body.values}
@@ -93,6 +98,8 @@ export default function (db) {
       }).catch(onError)
     })
     // Delete a table
+    // NOT USED
+    // TODO: add delete table option on GUI and delete corresponding cells when deleting table
     .delete(function (req, res) {
       let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       db.collection('tables').deleteOne(filter).then(function () {
@@ -106,18 +113,19 @@ export default function (db) {
       let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
       let update
       let columnId = new mongodb.ObjectID()
+      let columnName = Crypt.encrypt(req.body.columnName)
       if (req.body.position) {
         let position = parseInt(req.body.position)
         update = {
           $push: {
             columns: {
-              $each: [{columnName: req.body.columnName, columnId}],
+              $each: [{columnName, columnId}],
               $position: position
             }
           }
         }
       } else {
-        update = {$push: {columns: {columnName: req.body.columnName, columnId}}}
+        update = {$push: {columns: {columnName, columnId}}}
       }
       db.collection('tables').updateOne(filter, update).then(function () {
         res.send({columnId})
@@ -154,7 +162,8 @@ export default function (db) {
       let rowId = new mongodb.ObjectID(req.params.rowId)
       let columnId = new mongodb.ObjectID(req.params.columnId)
       let filter = {rowId, columnId}
-      let update = {rowId, columnId, value: Crypt.encrypt(req.body.cellValue)
+      let update = {
+        rowId, columnId, value: Crypt.encrypt(req.body.cellValue)
       }
       db.collection('cells').updateOne(filter, update, {upsert: true}).then(function (r) {
         res.send({cellId: r.upsertedId ? r.upsertedId._id : null})
@@ -164,6 +173,7 @@ export default function (db) {
 
   api.route('/tables/:tableId/columns/:columnId')
   // Update a column field
+  // NOTE: this will not work for updating the columnName because column names are encrypted
     .put(function (req, res) {
       let columnId = new mongodb.ObjectID(req.params.columnId)
       let filter = {_id: new mongodb.ObjectID(req.params.tableId), 'columns.columnId': columnId}

@@ -4,6 +4,15 @@ import initApi from './api'
 
 let runApp = function (db) {
   const app = express()
+
+  app.use(function (req, res, next) {
+    if (process.env.NODE_ENV === 'production' && req.headers['x-forwarded-proto'] !== 'https') {
+      res.redirect(302, 'https://' + req.hostname + req.originalUrl);
+    } else {
+      next();
+    }
+  })
+
   app.use(express.static('build'))
 
   let api = initApi(db)
