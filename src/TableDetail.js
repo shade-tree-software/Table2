@@ -134,7 +134,12 @@ export default class TableDetail extends React.Component {
     }).then((columnInfo) => {
       this.setState((prevState) => {
         position = position || prevState.columns.length
-        return ({columns: [...prevState.columns.slice(0, position), {columnName, columnId: columnInfo.columnId}, ...prevState.columns.slice(position)]})
+        return ({
+          columns: [...prevState.columns.slice(0, position), {
+            columnName,
+            columnId: columnInfo.columnId
+          }, ...prevState.columns.slice(position)]
+        })
       })
     })
   }
@@ -199,7 +204,7 @@ export default class TableDetail extends React.Component {
                   {this.sortLegend(column.columnId)}</ContextMenuTrigger>
               </th>
             )}
-            <th><AddColumnButton insertColumn={this.insertColumn}/></th>
+            <th><AddColumnButton insertColumn={this.insertColumn} isFirstColumn={this.state.columns.length === 0}/></th>
           </tr>
           </thead>
           <TableBody
@@ -207,7 +212,9 @@ export default class TableDetail extends React.Component {
             onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumnId={this.state.sortColumnId}
             sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns}/>
         </table>
-        <button onClick={this.addNewRow} className="btn btn-primary btn-sm">+</button>
+        {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
+                                                        className="btn btn-primary btn-sm">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
+
       </div>
     )
   }

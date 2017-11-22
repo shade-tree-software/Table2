@@ -29,7 +29,8 @@ export default class AddColumnButton extends React.Component {
     } else {
       return (
         <span>
-          <button onClick={this.getColumnName} className="btn btn-primary btn-sm">+</button>
+          <button onClick={this.getColumnName}
+                  className="btn btn-primary btn-sm">{this.props.isFirstColumn ? 'Add Column' : '+'}</button>
         </span>
       )
     }
