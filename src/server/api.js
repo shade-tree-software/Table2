@@ -53,6 +53,11 @@ export default function (db) {
     }
   });
 
+  api.route('/version')
+    .get(function(req, res){
+      res.send({version: process.env.npm_package_version})
+    })
+
   api.route('/tables')
   // Get all table names for the specified user
     .get(function (req, res) {
