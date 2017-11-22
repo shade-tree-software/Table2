@@ -5,6 +5,7 @@ import bodyParser from 'body-parser'
 import mongodb from 'mongodb'
 import Crypt from './Crypt'
 import co from 'co'
+import version from 'project-version';
 
 export default function (db) {
 
@@ -55,7 +56,7 @@ export default function (db) {
 
   api.route('/version')
     .get(function(req, res){
-      res.send({version: process.env.npm_package_version})
+      res.send({version})
     })
 
   api.route('/tables')
