@@ -214,7 +214,7 @@ export default class TableDetail extends React.Component {
             Delete Column
           </MenuItem>
         </ContextMenu>
-        <ContextMenu id="mobile-field-context-menu">
+        <ContextMenu id="mobile-field-context-menu" hideOnLeave="true">
           <MenuItem data={{command: 'hide'}} onClick={this.onContextMenuItemClick}>
             Hide this field
           </MenuItem>
