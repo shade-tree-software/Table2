@@ -27,7 +27,7 @@ export default class TableDetail extends React.Component {
     this.getTableDetails()
     this.timer = setInterval(() => {
       // Give MongoDB time to sync write data to all shards so we don't get stale data
-      if ((new Date() - this.lastServerWrite) > 5000){
+      if ((new Date() - this.lastServerWrite) > 5000) {
         this.getTableDetails()
       }
     }, 15000)
@@ -56,9 +56,16 @@ export default class TableDetail extends React.Component {
 
   getTableDetails = () => {
     fetch('/api/tables/' + this.props.match.params._id + '?token=' + localStorage.authToken).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
       return response.json()
     }).then((tableData) => {
       this.setState({...tableData, tableId: tableData._id})
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to get updates from server (${err.message})`)
     })
   }
 
@@ -230,7 +237,8 @@ export default class TableDetail extends React.Component {
           <TableBody
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
             onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumnId={this.state.sortColumnId}
-            sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns} logWriteEvent={this.logWriteEvent}/>
+            sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns}
+            logWriteEvent={this.logWriteEvent}/>
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
