@@ -20,10 +20,25 @@ export default class TableDetail extends React.Component {
       sortColumnId: '',
       sortOrder: 'asc'
     }
+    this.lastServerWrite = new Date(0)
   }
 
   componentDidMount() {
     this.getTableDetails()
+    this.timer = setInterval(() => {
+      // Give MongoDB time to sync write data to all shards so we don't get stale data
+      if ((new Date() - this.lastServerWrite) > 5000){
+        this.getTableDetails()
+      }
+    }, 15000)
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.timer)
+  }
+
+  logWriteEvent = () => {
+    this.lastServerWrite = new Date()
   }
 
   showModal = () => {
@@ -48,6 +63,7 @@ export default class TableDetail extends React.Component {
   }
 
   addNewRow = (e) => {
+    this.logWriteEvent()
     fetch(`/api/tables/${this.props.match.params._id}/rows?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
@@ -63,6 +79,7 @@ export default class TableDetail extends React.Component {
   }
 
   setSortCriteria = (sortColumnId, sortOrder) => {
+    this.logWriteEvent()
     fetch(`/api/tables/${this.state.tableId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
@@ -75,6 +92,7 @@ export default class TableDetail extends React.Component {
   }
 
   changeColumnVisibility = (columnId, hiddenOnMobile) => {
+    this.logWriteEvent()
     fetch(`/api/tables/${this.state.tableId}/columns/${columnId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
@@ -114,6 +132,7 @@ export default class TableDetail extends React.Component {
   }
 
   deleteColumn = (columnId) => {
+    this.logWriteEvent()
     fetch(`/api/tables/${this.props.match.params._id}/columns/${columnId}?token=${localStorage.authToken}`, {
       method: 'delete',
     }).then(() => {
@@ -123,6 +142,7 @@ export default class TableDetail extends React.Component {
   }
 
   insertColumn = (columnName, position) => {
+    this.logWriteEvent()
     fetch(`/api/tables/${this.props.match.params._id}/columns?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
@@ -210,7 +230,7 @@ export default class TableDetail extends React.Component {
           <TableBody
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
             onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumnId={this.state.sortColumnId}
-            sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns}/>
+            sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns} logWriteEvent={this.logWriteEvent}/>
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}

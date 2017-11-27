@@ -4,6 +4,7 @@ import TableCell from './TableCell'
 
 export default class TableBody extends React.Component {
   onDeleteRowClick = (e, rowId) => {
+    this.props.logWriteEvent()
     fetch(`/api/tables/${this.props.tableId}/rows/${rowId}?token=${localStorage.authToken}`, {
       method: 'delete',
     }).then(this.props.onRowDeleted(rowId))
@@ -91,7 +92,8 @@ export default class TableBody extends React.Component {
                      column={column}
                      text={rowData[column.columnId] ? rowData[column.columnId].cellText : ''}
                      cellId={rowData[column.columnId] ? rowData[column.columnId].cellId : null}
-                     onCellChanged={this.props.onCellChanged}/>
+                     onCellChanged={this.props.onCellChanged}
+                     logWriteEvent={this.props.logWriteEvent}/>
         ))}
           <td>
             <button onClick={(e) => this.onDeleteRowClick(e, rowId)} className="btn btn-danger btn-sm">X</button>

@@ -10,6 +10,7 @@ export default class TableCell extends React.Component {
   }
 
   okHandler = (cellValue) => {
+    this.props.logWriteEvent()
     this.setState({editing: false})
     fetch(`/api/tables/${this.props.tableId}/rows/${this.props.rowId}/columns/${this.props.column.columnId}?token=${localStorage.authToken}`, {
       headers: {

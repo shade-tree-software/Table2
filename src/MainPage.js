@@ -37,6 +37,8 @@ export default class MainPage extends React.Component {
   }
 
   deleteTable = (_id) => {
+    // NOTE: Note used
+    // TODO: figure out what to do if another session is currently viewing this table
     fetch('api/tables/' + _id + '?token=' + localStorage.authToken, {
       headers: {
         'Content-Type': 'application/json'
