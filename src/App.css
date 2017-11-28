@@ -40,3 +40,7 @@
   -webkit-user-select: none !important;
   -webkit-touch-callout: none !important;
 }
+
+html {
+  font-size: .88rem;
+}
