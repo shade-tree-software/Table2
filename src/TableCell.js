@@ -1,5 +1,4 @@
 import React from 'react'
-import {ContextMenuTrigger} from "react-contextmenu";
 
 import TextBoxForm from './TextBoxForm'
 
@@ -38,6 +37,11 @@ export default class TableCell extends React.Component {
     this.setState({editing: true})
   }
 
+  onHideColumn = (e) => {
+    e.stopPropagation()
+    this.props.changeColumnVisibility(this.props.column.columnId, true)
+  }
+
   render() {
     if (this.state.editing) {
       return (
@@ -50,10 +54,8 @@ export default class TableCell extends React.Component {
     } else {
       return (
         <td onClick={this.onCellClick} className={this.props.column.hiddenOnMobile ? 'large-only' : ''}>
-          <ContextMenuTrigger attributes={{'column-id': this.props.column.columnId}}
-                              id="mobile-field-context-menu">
-            <span className="small-only bold-text">{this.props.column.columnName}: </span>{this.props.text}
-          </ContextMenuTrigger>
+          <span className="small-only bold-text">{this.props.column.columnName}: </span>{this.props.text}
+          <button onClick={this.onHideColumn} className="btn btn-warning btn-sm float-right small-only">&lt;</button>
         </td>
       )
     }

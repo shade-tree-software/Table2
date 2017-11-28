@@ -125,8 +125,6 @@ export default class TableDetail extends React.Component {
       this.setSortCriteria(target.getAttribute('column-id'), 'asc')
     } else if (data.command === 'sort-desc') {
       this.setSortCriteria(target.getAttribute('column-id'), 'desc')
-    } else if (data.command === 'hide') {
-      this.changeColumnVisibility(target.getAttribute('column-id'), true)
     }
   }
 
@@ -214,11 +212,6 @@ export default class TableDetail extends React.Component {
             Delete Column
           </MenuItem>
         </ContextMenu>
-        <ContextMenu id="mobile-field-context-menu" hideOnLeave="true">
-          <MenuItem data={{command: 'hide'}} onClick={this.onContextMenuItemClick}>
-            Hide this field
-          </MenuItem>
-        </ContextMenu>
         <br/>
         <h1>{this.state.tableName}</h1>
         <table className="table table-hover table-striped">
@@ -238,7 +231,7 @@ export default class TableDetail extends React.Component {
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
             onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumnId={this.state.sortColumnId}
             sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns}
-            logWriteEvent={this.logWriteEvent}/>
+            logWriteEvent={this.logWriteEvent} changeColumnVisibility={this.changeColumnVisibility}/>
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}

@@ -93,12 +93,13 @@ export default class TableBody extends React.Component {
                      text={rowData[column.columnId] ? rowData[column.columnId].cellText : ''}
                      cellId={rowData[column.columnId] ? rowData[column.columnId].cellId : null}
                      onCellChanged={this.props.onCellChanged}
-                     logWriteEvent={this.props.logWriteEvent}/>
+                     logWriteEvent={this.props.logWriteEvent}
+                     changeColumnVisibility={this.props.changeColumnVisibility}/>
         ))}
           <td>
             <button onClick={(e) => this.onDeleteRowClick(e, rowId)} className="btn btn-danger btn-sm">X</button>
             <button onClick={this.props.showHiddenFields} hidden={!hiddenColumns}
-                    className="btn btn-success btn-sm float-right small-only">Show Hidden Fields
+                    className="btn btn-warning btn-sm float-right small-only">Show Hidden Fields
             </button>
           </td>
         </tr>
