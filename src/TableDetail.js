@@ -218,7 +218,7 @@ export default class TableDetail extends React.Component {
           <thead>
           <tr className="large-only">
             {this.state.columns.map((column, index) =>
-              <th key={index}>
+              <th key={index} className="disable-ios-copy-paste">
                 <ContextMenuTrigger attributes={{'column-id': column.columnId, index: index}}
                                     id="column-header-context-menu">{column.columnName}
                   {this.sortLegend(column.columnId)}</ContextMenuTrigger>

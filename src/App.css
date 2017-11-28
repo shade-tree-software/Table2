@@ -35,3 +35,8 @@
 .row-color-na {
   background-color: lightblue !important;
 }
+
+.disable-ios-copy-paste {
+  -webkit-user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
