@@ -19,12 +19,10 @@ export default class TableBody extends React.Component {
       let sortDate = new Date(sortDateText)
       if (sortDate.toString() === 'Invalid Date') {
         rowColor = 'row-color-invalid'
-      } else if (((new Date()) - sortDate) > 604800000 * 3) {
-        rowColor = 'row-color-week3'
-      } else if (((new Date()) - sortDate) > 604800000 * 2) {
-        rowColor = 'row-color-week2'
-      } else if (((new Date()) - sortDate) > 604800000) {
-        rowColor = 'row-color-week1'
+      } else if (((new Date()) - sortDate) > 604800000) { // one week
+        rowColor = 'row-color-b'
+      } else if (((new Date()) - sortDate) > 172800000) { // two days
+        rowColor = 'row-color-a'
       }
     }
     return rowColor

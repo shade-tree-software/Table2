@@ -23,13 +23,10 @@
   font-weight: bold;
 }
 
-.row-color-week1 {
+.row-color-a {
   background-color: lightgreen !important;
 }
-.row-color-week2 {
-  background-color: mediumseagreen !important;
-}
-.row-color-week3 {
+.row-color-b {
   background-color: violet !important;
 }
 .row-color-invalid {
