@@ -18,10 +18,17 @@ export default class LoginForm extends React.Component {
       method: 'post',
       body: JSON.stringify(this.state)
     }).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
       return response.json()
     }).then((data) => {
       localStorage.authToken = data.token
       this.props.history.push('/main')
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to authenticate user (${err.message})`)
     })
   }
 

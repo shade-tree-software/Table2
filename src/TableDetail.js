@@ -77,11 +77,18 @@ export default class TableDetail extends React.Component {
       },
       method: 'post'
     }).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
       return response.json()
     }).then((newRow) => {
       this.setState((prevState) => ({
         rows: [...prevState.rows, newRow]
       }))
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to save new row to server (${err.message})`)
     })
   }
 
@@ -93,8 +100,15 @@ export default class TableDetail extends React.Component {
       },
       method: 'put',
       body: JSON.stringify({values: {sortColumnId, sortOrder}})
-    }).then(() => {
+    }).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
       this.setState({sortColumnId, sortOrder})
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to save sort preferences to server (${err.message})`)
     })
   }
 
@@ -106,12 +120,19 @@ export default class TableDetail extends React.Component {
       },
       method: 'put',
       body: JSON.stringify({fieldName: 'hiddenOnMobile', fieldValue: hiddenOnMobile})
-    }).then(() => {
+    }).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
       this.setState((prevState) => {
         let columnIndex = prevState.columns.findIndex((column) => (column.columnId === columnId))
         let modifiedColumn = {columnId: columnId, hiddenOnMobile, columnName: prevState.columns[columnIndex].columnName}
         return ({columns: [...prevState.columns.slice(0, columnIndex), modifiedColumn, ...prevState.columns.slice(columnIndex + 1)]});
       })
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to save column visibility preferences to server (${err.message})`)
     })
   }
 
@@ -141,9 +162,16 @@ export default class TableDetail extends React.Component {
       this.logWriteEvent()
       fetch(`/api/tables/${this.props.match.params._id}/columns/${columnId}?token=${localStorage.authToken}`, {
         method: 'delete',
-      }).then(() => {
+      }).then((response) => {
+        if (response.ok) {
+          this.props.hideErrorBanner()
+        } else {
+          throw new Error(response.statusText)
+        }
         let index = this.state.columns.findIndex((elem) => (elem.columnId === columnId))
         this.setState((prevState) => ({columns: [...prevState.columns.slice(0, index), ...prevState.columns.slice(index + 1)]}))
+      }).catch((err) => {
+        this.props.showErrorBanner(`Unable to delete column from server (${err.message})`)
       })
     }
   }
@@ -157,6 +185,11 @@ export default class TableDetail extends React.Component {
       method: 'post',
       body: JSON.stringify({columnName, position})
     }).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
       return response.json()
     }).then((columnInfo) => {
       this.setState((prevState) => {
@@ -168,6 +201,8 @@ export default class TableDetail extends React.Component {
           }, ...prevState.columns.slice(position)]
         })
       })
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to save new column to server (${err.message})`)
     })
   }
 
@@ -233,7 +268,9 @@ export default class TableDetail extends React.Component {
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
             onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumnId={this.state.sortColumnId}
             sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns}
-            logWriteEvent={this.logWriteEvent} changeColumnVisibility={this.changeColumnVisibility}/>
+            logWriteEvent={this.logWriteEvent} changeColumnVisibility={this.changeColumnVisibility}
+            showErrorBanner={this.props.showErrorBanner}
+            hideErrorBanner={this.props.hideErrorBanner}/>
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}

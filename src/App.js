@@ -34,12 +34,18 @@ class App extends Component {
               {this.state.errorBannerMessage}
             </div>
             <Route exact path="/" render={(props) => (
-              localStorage.authToken ? <MainPage {...props}/> : <Redirect to="/login"/> )}/>
-            <Route path="/login" component={LoginForm}/>
+              localStorage.authToken ? <MainPage showErrorBanner={this.showErrorBanner}
+                                                 hideErrorBanner={this.hideErrorBanner} {...props}/> :
+                <Redirect to="/login"/> )}/>
+            <Route path="/login" render={() => (<LoginForm showErrorBanner={this.showErrorBanner}
+                                                           hideErrorBanner={this.hideErrorBanner}/> )}/>
             <Route path="/main" render={(props) => (
-              localStorage.authToken ? <MainPage {...props}/> : <Redirect to="/login"/> )}/>
+              localStorage.authToken ? <MainPage showErrorBanner={this.showErrorBanner}
+                                                 hideErrorBanner={this.hideErrorBanner} {...props}/> :
+                <Redirect to="/login"/> )}/>
             <Route path="/about" render={() => (
-              localStorage.authToken ? <About/> : <Redirect to="/login"/> )}/>
+              localStorage.authToken ? <About showErrorBanner={this.showErrorBanner}
+                                              hideErrorBanner={this.hideErrorBanner}/> : <Redirect to="/login"/> )}/>
             <Route path="/tables/:_id" render={(props) => (
               localStorage.authToken ? <TableDetail showErrorBanner={this.showErrorBanner}
                                                     hideErrorBanner={this.hideErrorBanner} {...props}/> :

@@ -8,7 +8,16 @@ export default class TableBody extends React.Component {
       this.props.logWriteEvent()
       fetch(`/api/tables/${this.props.tableId}/rows/${rowId}?token=${localStorage.authToken}`, {
         method: 'delete',
-      }).then(this.props.onRowDeleted(rowId))
+      }).then((response) => {
+        if (response.ok) {
+          this.props.hideErrorBanner()
+        } else {
+          throw new Error(response.statusText)
+        }
+        this.props.onRowDeleted(rowId)
+      }).catch((err) => {
+        this.props.showErrorBanner(`Unable to delete row from server (${err.message})`)
+      })
     }
   }
 
@@ -94,7 +103,9 @@ export default class TableBody extends React.Component {
                      cellId={rowData[column.columnId] ? rowData[column.columnId].cellId : null}
                      onCellChanged={this.props.onCellChanged}
                      logWriteEvent={this.props.logWriteEvent}
-                     changeColumnVisibility={this.props.changeColumnVisibility}/>
+                     changeColumnVisibility={this.props.changeColumnVisibility}
+                     showErrorBanner={this.props.showErrorBanner}
+                     hideErrorBanner={this.props.hideErrorBanner}/>
         ))}
           <td>
             <button onClick={(e) => this.onDeleteRowClick(e, rowId)} className="btn btn-danger btn-sm">X</button>

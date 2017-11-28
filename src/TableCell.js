@@ -18,6 +18,11 @@ export default class TableCell extends React.Component {
       method: 'put',
       body: JSON.stringify({cellValue})
     }).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
       return response.json()
     }).then((cellInfo) => {
       this.props.onCellChanged({
@@ -26,6 +31,8 @@ export default class TableCell extends React.Component {
         rowId: this.props.rowId,
         columnId: this.props.column.columnId
       })
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to save new cell data to server (${err.message})`)
     })
   }
 

@@ -20,9 +20,16 @@ export default class MainPage extends React.Component {
 
   getTables = () => {
     fetch('api/tables?token=' + localStorage.authToken).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
       return response.json()
     }).then((data) => {
       this.setState({tables: data})
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to get list of tables from server (${err.message})`)
     })
   }
 
@@ -33,7 +40,16 @@ export default class MainPage extends React.Component {
       },
       method: 'post',
       body: JSON.stringify({tableName})
-    }).then(this.getTables)
+    }).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
+      this.getTables()
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to add new table to server (${err.message})`)
+    })
   }
 
   deleteTable = (_id) => {
@@ -44,7 +60,16 @@ export default class MainPage extends React.Component {
         'Content-Type': 'application/json'
       },
       method: 'delete'
-    }).then(this.getTables)
+    }).then((response) => {
+      if (response.ok) {
+        this.props.hideErrorBanner()
+      } else {
+        throw new Error(response.statusText)
+      }
+      this.getTables()
+    }).catch((err) => {
+      this.props.showErrorBanner(`Unable to delete table from server (${err.message})`)
+    })
   }
 
   render() {
