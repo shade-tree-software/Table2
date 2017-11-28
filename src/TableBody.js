@@ -4,10 +4,12 @@ import TableCell from './TableCell'
 
 export default class TableBody extends React.Component {
   onDeleteRowClick = (e, rowId) => {
-    this.props.logWriteEvent()
-    fetch(`/api/tables/${this.props.tableId}/rows/${rowId}?token=${localStorage.authToken}`, {
-      method: 'delete',
-    }).then(this.props.onRowDeleted(rowId))
+    if (window.confirm('Are you sure?')) {
+      this.props.logWriteEvent()
+      fetch(`/api/tables/${this.props.tableId}/rows/${rowId}?token=${localStorage.authToken}`, {
+        method: 'delete',
+      }).then(this.props.onRowDeleted(rowId))
+    }
   }
 
   rowColor = (sortDateText) => {

@@ -137,13 +137,15 @@ export default class TableDetail extends React.Component {
   }
 
   deleteColumn = (columnId) => {
-    this.logWriteEvent()
-    fetch(`/api/tables/${this.props.match.params._id}/columns/${columnId}?token=${localStorage.authToken}`, {
-      method: 'delete',
-    }).then(() => {
-      let index = this.state.columns.findIndex((elem) => (elem.columnId === columnId))
-      this.setState((prevState) => ({columns: [...prevState.columns.slice(0, index), ...prevState.columns.slice(index + 1)]}))
-    })
+    if (window.confirm('Are you sure?')) {
+      this.logWriteEvent()
+      fetch(`/api/tables/${this.props.match.params._id}/columns/${columnId}?token=${localStorage.authToken}`, {
+        method: 'delete',
+      }).then(() => {
+        let index = this.state.columns.findIndex((elem) => (elem.columnId === columnId))
+        this.setState((prevState) => ({columns: [...prevState.columns.slice(0, index), ...prevState.columns.slice(index + 1)]}))
+      })
+    }
   }
 
   insertColumn = (columnName, position) => {
