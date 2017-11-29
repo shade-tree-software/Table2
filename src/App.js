@@ -37,8 +37,8 @@ class App extends Component {
               localStorage.authToken ? <MainPage showErrorBanner={this.showErrorBanner}
                                                  hideErrorBanner={this.hideErrorBanner} {...props}/> :
                 <Redirect to="/login"/> )}/>
-            <Route path="/login" render={() => (<LoginForm showErrorBanner={this.showErrorBanner}
-                                                           hideErrorBanner={this.hideErrorBanner}/> )}/>
+            <Route path="/login" render={(props) => (<LoginForm showErrorBanner={this.showErrorBanner}
+                                                           hideErrorBanner={this.hideErrorBanner} {...props}/> )}/>
             <Route path="/main" render={(props) => (
               localStorage.authToken ? <MainPage showErrorBanner={this.showErrorBanner}
                                                  hideErrorBanner={this.hideErrorBanner} {...props}/> :

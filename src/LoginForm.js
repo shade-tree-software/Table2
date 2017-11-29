@@ -43,7 +43,7 @@ export default class LoginForm extends React.Component {
         <div className="row">
           <div className="col-lg-3 col-md-4 col-sm-5">
             <input name="username"
-                   autocapitalize="none"
+                   autoCapitalize="none"
                    className="form-control"
                    placeholder="username"
                    value={this.state.username}
