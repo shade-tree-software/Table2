@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import AddColumnButton from './AddColumnButton'
 import TextBoxForm from './TextBoxForm'
 import TableBody from './TableBody'
+import FileUpload from './FileUpload'
 import './ReactContextMenu.css'
 
 export default class TableDetail extends React.Component {
@@ -274,7 +275,9 @@ export default class TableDetail extends React.Component {
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
-
+        <span className="form-group float-right">
+          <FileUpload showErrorBanner={this.props.showErrorBanner} hideErrorBanner={this.props.hideErrorBanner}/>
+        </span>
       </div>
     )
   }

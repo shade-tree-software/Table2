@@ -59,6 +59,13 @@ export default function (db) {
       res.send({version})
     })
 
+  api.route('/files')
+    // Upload files
+    .post(function (req, res) {
+      console.log(req)
+      res.send('{"data":"good copy"}')
+    })
+
   api.route('/tables')
   // Get all table names for the specified user
     .get(function (req, res) {
