@@ -5,14 +5,17 @@ import bodyParser from 'body-parser'
 import mongodb from 'mongodb'
 import Crypt from './Crypt'
 import co from 'co'
-import version from 'project-version';
+import version from 'project-version'
+import DBFuncs from './DBFuncs'
 
 export default function (db) {
 
   let api = express.Router()
+  let dbFuncs = new DBFuncs(db)
 
   api.use(bodyParser.urlencoded({extended: false}))
   api.use(bodyParser.json())
+  api.use(bodyParser.text())
 
   function onError(err) {
     console.log(err.stack)
@@ -55,15 +58,15 @@ export default function (db) {
   });
 
   api.route('/version')
-    .get(function(req, res){
+    .get(function (req, res) {
       res.send({version})
     })
 
-  api.route('/files')
-    // Upload files
+  api.route('/csv')
+  // Upload a csv file and send the contents back to the browser in the response
     .post(function (req, res) {
-      console.log(req)
-      res.send('{"data":"good copy"}')
+      console.log(req.body)
+      res.send(req.body)
     })
 
   api.route('/tables')
@@ -91,7 +94,7 @@ export default function (db) {
       co(function* () {
         let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
         let table = yield db.collection('tables').findOne(filter)
-        let rowIds = table.rows ? table.rows.map((row) => ( row.rowId )) : []
+        let rowIds = table.rows ? table.rows.map((row) => (row.rowId)) : []
         let cells = yield db.collection('cells').find({rowId: {$in: rowIds}}).toArray()
         let decryptedCells = cells.map((cell) => ({...cell, value: Crypt.decrypt(cell.value)}))
         if (table.columns) {
@@ -122,36 +125,16 @@ export default function (db) {
 
   api.route('/tables/:tableId/columns')
   // Add or insert a new column into a table
-    .post(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
-      let update
-      let columnId = new mongodb.ObjectID()
-      let columnName = Crypt.encrypt(req.body.columnName)
-      if (req.body.position) {
-        let position = parseInt(req.body.position)
-        update = {
-          $push: {
-            columns: {
-              $each: [{columnName, columnId}],
-              $position: position
-            }
-          }
-        }
-      } else {
-        update = {$push: {columns: {columnName, columnId}}}
-      }
-      db.collection('tables').updateOne(filter, update).then(function () {
+    .post((req, res) => {
+      dbFuncs.addColumn(req.params.tableId, req.body.columnName, req.body.position).then((columnId) => {
         res.send({columnId})
       }).catch(onError)
     })
 
   api.route('/tables/:tableId/rows')
   // Add a new row to a table
-    .post(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
-      let rowId = new mongodb.ObjectId()
-      let update = {$push: {rows: {rowId}}}
-      db.collection('tables').updateOne(filter, update).then(function () {
+    .post((req, res) => {
+      dbFuncs.addRow(req.params.tableId).then((rowId) => {
         res.send({rowId})
       }).catch(onError)
     })
@@ -171,15 +154,9 @@ export default function (db) {
 
   api.route('/tables/:tableId/rows/:rowId/columns/:columnId')
   // Set the value of a table cell
-    .put(function (req, res) {
-      let rowId = new mongodb.ObjectID(req.params.rowId)
-      let columnId = new mongodb.ObjectID(req.params.columnId)
-      let filter = {rowId, columnId}
-      let update = {
-        rowId, columnId, value: Crypt.encrypt(req.body.cellValue)
-      }
-      db.collection('cells').updateOne(filter, update, {upsert: true}).then(function (r) {
-        res.send({cellId: r.upsertedId ? r.upsertedId._id : null})
+    .put((req, res) => {
+      dbFuncs.setCellValue(req.params.rowId, req.params.columnId, req.body.cellValue).then((cellId) => {
+        res.send({cellId})
       }).catch(onError)
     })
 

@@ -33,7 +33,7 @@ export default class TableDetail extends React.Component {
   }
 
   uploadFile = (e) => {
-    fetch(`/api/files?token=${localStorage.authToken}`, {
+    fetch(`/api/csv?token=${localStorage.authToken}`, {
       method: 'post',
       body: e.currentTarget.result
     }).then((response) => {
@@ -42,9 +42,10 @@ export default class TableDetail extends React.Component {
       } else {
         throw new Error(response.statusText)
       }
-      return response.json()
-    }).then((data) => {
+      return response.text()
+    }).then((csvText) => {
       this.setState({submitButtonText: 'Upload'})
+      console.log(csvText)
     }).catch((err) => {
       this.setState({submitButtonText: 'Upload'})
       this.props.showErrorBanner(`Unable to upload file (${err.message})`)
@@ -67,7 +68,8 @@ export default class TableDetail extends React.Component {
             </span>
           </span>
           <span className="btn-group">
-            <button className="btn btn-primary ml-sm-1" ref={this.setSubmitButton}
+            <button className="btn btn-primary ml-sm-1" disabled={this.state.csvFilename.length < 1}
+                    ref={this.setSubmitButton}
                     type="submit">{this.state.submitButtonText}</button>
           </span>
         </span>
