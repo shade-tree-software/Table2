@@ -32,9 +32,7 @@ export default class DBFuncs {
       let filter = {_id: new mongodb.ObjectID(tableId)}
       let update
       let columnId = new mongodb.ObjectID()
-      console.log(columnNamePlaintext)
       let columnName = Crypt.encrypt(columnNamePlaintext)
-      console.log(columnName)
       if (columnPosition) {
         let position = parseInt(columnPosition)
         update = {
@@ -56,15 +54,15 @@ export default class DBFuncs {
 
   addColumns = (tableId, columnNames) => {
     return new Promise((fulfill, reject) => {
-      let count = columnNames.length
-      columnNames.forEach((columnName) => {
-        this.addColumn(tableId, columnName).then(() => {
-          count--
-          if (count === 0){
-            fulfill()
+      let colIds = {}
+      for (let colIndex = 0; colIndex < columnNames.length; colIndex++) {
+        this.addColumn(tableId, columnNames[colIndex]).then((colId) => {
+          colIds[colIndex] = colId
+          if (Object.keys(colIds).length === columnNames.length) {
+            fulfill(colIds)
           }
         }).catch(reject)
-      })
+      }
     })
   }
 
@@ -76,6 +74,24 @@ export default class DBFuncs {
       this.db.collection('tables').updateOne(filter, update).then(() => {
         fulfill(rowId)
       }).catch(reject)
+    })
+  }
+
+  addRowsWithCellData = (tableId, cellDataByRow) => {
+    return new Promise((fulfill, reject) => {
+      let numCellsToAdd = !cellDataByRow || cellDataByRow.length === 0 ? 0 : cellDataByRow.length * cellDataByRow[0].length
+      cellDataByRow.forEach((rowCellData) => {
+        this.addRow(tableId).then((rowId) => {
+          rowCellData.forEach((cellData) => {
+            this.setCellValue(rowId, cellData.colId, cellData.value).then(() => {
+              numCellsToAdd--
+              if (numCellsToAdd === 0) {
+                fulfill()
+              }
+            })
+          })
+        }).catch(reject)
+      })
     })
   }
 

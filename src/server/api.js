@@ -62,24 +62,44 @@ export default function (db) {
       res.send({version})
     })
 
-  let processCSV = (csvFile) => {
+  let getCSVColumnNames = (csvFile) => {
     return new Promise((fulfill, reject) => {
       let lines = csvFile.split('\n')
       if (lines.length > 0) {
         let columnNames = lines[0].split(',')
         fulfill(columnNames)
       } else {
-        reject(new Error('invalid csv file'))
+        reject(new Error('CSV file seems to be empty'))
       }
     })
   }
 
+  let getCSVCellData = (csvFile, colIds) => {
+    let cellDataByRow = []
+    let lines = csvFile.split('\n')
+    if (lines.length > 1) {
+      for (let rowIndex = 1; rowIndex < lines.length; rowIndex++) {
+        let cellValues = lines[rowIndex].split(',')
+        if (cellValues.length === Object.keys(colIds).length) {
+          let cellData = []
+          for (let cellIndex = 0; cellIndex < cellValues.length; cellIndex++) {
+            cellData.push({value: cellValues[cellIndex], colId: colIds[cellIndex]})
+          }
+          cellDataByRow.push(cellData)
+        }
+      }
+    }
+    return cellDataByRow
+  }
+
   api.route('/tables/:tableId/csv')
-  // Upload a csv file and send the contents back to the browser in the response
+  // Upload a csv file
     .post(function (req, res) {
       co(function* () {
-        let columnNames = yield processCSV(req.body)
-        yield dbFuncs.addColumns(req.params.tableId, columnNames)
+        let columnNames = yield getCSVColumnNames(req.body)
+        let colIds = yield dbFuncs.addColumns(req.params.tableId, columnNames)
+        let cellData = getCSVCellData(req.body, colIds)
+        yield dbFuncs.addRowsWithCellData(req.params.tableId, cellData)
         let tableDetails = yield dbFuncs.getTableDetails(req.params.tableId)
         res.send(tableDetails)
       }).catch(onError)
