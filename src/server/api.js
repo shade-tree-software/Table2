@@ -62,11 +62,27 @@ export default function (db) {
       res.send({version})
     })
 
-  api.route('/csv')
+  let processCSV = (csvFile) => {
+    return new Promise((fulfill, reject) => {
+      let lines = csvFile.split('\n')
+      if (lines.length > 0) {
+        let columnNames = lines[0].split(',')
+        fulfill(columnNames)
+      } else {
+        reject(new Error('invalid csv file'))
+      }
+    })
+  }
+
+  api.route('/tables/:tableId/csv')
   // Upload a csv file and send the contents back to the browser in the response
     .post(function (req, res) {
-      console.log(req.body)
-      res.send(req.body)
+      co(function* () {
+        let columnNames = yield processCSV(req.body)
+        yield dbFuncs.addColumns(req.params.tableId, columnNames)
+        let tableDetails = yield dbFuncs.getTableDetails(req.params.tableId)
+        res.send(tableDetails)
+      }).catch(onError)
     })
 
   api.route('/tables')
@@ -91,18 +107,8 @@ export default function (db) {
   api.route('/tables/:tableId')
   // Get the complete contents of a specific table
     .get(function (req, res) {
-      co(function* () {
-        let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
-        let table = yield db.collection('tables').findOne(filter)
-        let rowIds = table.rows ? table.rows.map((row) => (row.rowId)) : []
-        let cells = yield db.collection('cells').find({rowId: {$in: rowIds}}).toArray()
-        let decryptedCells = cells.map((cell) => ({...cell, value: Crypt.decrypt(cell.value)}))
-        if (table.columns) {
-          table.columns.forEach(function (column) {
-            column.columnName = Crypt.decrypt(column.columnName)
-          })
-        }
-        res.send({rows: [], columns: [], ...table, cells: decryptedCells})
+      dbFuncs.getTableDetails(req.params.tableId).then((tableDetails) => {
+        res.send(tableDetails)
       }).catch(onError);
     })
     // Set the value of a particular field in a top-level 'table' document

@@ -33,20 +33,18 @@ export default class TableDetail extends React.Component {
   }
 
   uploadFile = (e) => {
-    fetch(`/api/csv?token=${localStorage.authToken}`, {
+    fetch(`/api/tables/${this.props.tableId}/csv?token=${localStorage.authToken}`, {
       method: 'post',
       body: e.currentTarget.result
     }).then((response) => {
+      this.setState({submitButtonText: 'Upload'})
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
         throw new Error(response.statusText)
       }
-      return response.text()
-    }).then((csvText) => {
-      this.setState({submitButtonText: 'Upload'})
-      console.log(csvText)
-    }).catch((err) => {
+      return response.json()
+    }).then(this.props.updateTable).catch((err) => {
       this.setState({submitButtonText: 'Upload'})
       this.props.showErrorBanner(`Unable to upload file (${err.message})`)
     })

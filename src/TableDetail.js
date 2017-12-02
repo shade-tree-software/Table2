@@ -55,6 +55,10 @@ export default class TableDetail extends React.Component {
     this.insertColumn(columnName, this.state.insertColumnPosition)
   }
 
+  updateTable = (tableDetails) => {
+    this.setState({...tableDetails, tableId: tableDetails._id})
+  }
+
   getTableDetails = () => {
     fetch('/api/tables/' + this.props.match.params._id + '?token=' + localStorage.authToken).then((response) => {
       if (response.ok) {
@@ -63,9 +67,7 @@ export default class TableDetail extends React.Component {
         throw new Error(response.statusText)
       }
       return response.json()
-    }).then((tableData) => {
-      this.setState({...tableData, tableId: tableData._id})
-    }).catch((err) => {
+    }).then(this.updateTable).catch((err) => {
       this.props.showErrorBanner(`Unable to get updates from server (${err.message})`)
     })
   }
@@ -276,7 +278,8 @@ export default class TableDetail extends React.Component {
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
         <span className="form-group float-right">
-          <FileUpload showErrorBanner={this.props.showErrorBanner} hideErrorBanner={this.props.hideErrorBanner}/>
+          <FileUpload tableId={this.state.tableId} showErrorBanner={this.props.showErrorBanner}
+                      hideErrorBanner={this.props.hideErrorBanner} updateTable={this.updateTable}/>
         </span>
       </div>
     )

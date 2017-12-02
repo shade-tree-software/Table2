@@ -1,10 +1,30 @@
 import mongodb from 'mongodb'
 import Crypt from './Crypt'
+import co from 'co'
 
 export default class DBFuncs {
 
   constructor(db) {
     this.db = db
+  }
+
+  getTableDetails = (tableId) => {
+    let db = this.db
+    return new Promise((fulfill, reject) => {
+      co(function* () {
+        let filter = {_id: new mongodb.ObjectID(tableId)}
+        let table = yield db.collection('tables').findOne(filter)
+        let rowIds = table.rows ? table.rows.map((row) => (row.rowId)) : []
+        let cells = yield db.collection('cells').find({rowId: {$in: rowIds}}).toArray()
+        let decryptedCells = cells.map((cell) => ({...cell, value: Crypt.decrypt(cell.value)}))
+        if (table.columns) {
+          table.columns.forEach(function (column) {
+            column.columnName = Crypt.decrypt(column.columnName)
+          })
+        }
+        fulfill({rows: [], columns: [], ...table, cells: decryptedCells})
+      }).catch(reject);
+    })
   }
 
   addColumn = (tableId, columnNamePlaintext, columnPosition) => {
@@ -32,6 +52,20 @@ export default class DBFuncs {
         fulfill(columnId)
       }).catch(reject)
     });
+  }
+
+  addColumns = (tableId, columnNames) => {
+    return new Promise((fulfill, reject) => {
+      let count = columnNames.length
+      columnNames.forEach((columnName) => {
+        this.addColumn(tableId, columnName).then(() => {
+          count--
+          if (count === 0){
+            fulfill()
+          }
+        }).catch(reject)
+      })
+    })
   }
 
   addRow = (tableId) => {
