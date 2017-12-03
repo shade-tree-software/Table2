@@ -79,7 +79,7 @@ export default function (db) {
     let lines = csvFile.split('\n')
     if (lines.length > 1) {
       for (let rowIndex = 1; rowIndex < lines.length; rowIndex++) {
-        let cellValues = lines[rowIndex].split(',')
+        let cellValues = lines[rowIndex].split(/,(?! )/)
         if (cellValues.length === Object.keys(colIds).length) {
           let cellData = []
           for (let cellIndex = 0; cellIndex < cellValues.length; cellIndex++) {
@@ -89,6 +89,9 @@ export default function (db) {
         }
       }
     }
+    if (cellDataByRow.length === 0) {
+      throw new Error('CSV file contains no valid rows')
+    }
     return cellDataByRow
   }
 
@@ -96,13 +99,16 @@ export default function (db) {
   // Upload a csv file
     .post(function (req, res) {
       co(function* () {
-        let columnNames = yield getCSVColumnNames(req.body)
+        let csv = req.body.replace(/["\r]/g, '')
+        let columnNames = yield getCSVColumnNames(csv)
         let colIds = yield dbFuncs.addColumns(req.params.tableId, columnNames)
-        let cellData = getCSVCellData(req.body, colIds)
+        let cellData = getCSVCellData(csv, colIds)
         yield dbFuncs.addRowsWithCellData(req.params.tableId, cellData)
         let tableDetails = yield dbFuncs.getTableDetails(req.params.tableId)
         res.send(tableDetails)
-      }).catch(onError)
+      }).catch((err) => {
+        res.status(400).send(err.message)
+      })
     })
 
   api.route('/tables')
@@ -195,7 +201,7 @@ export default function (db) {
       let filter = {_id: new mongodb.ObjectID(req.params.tableId), 'columns.columnId': columnId}
       let fieldQuery = `columns.$.${req.body.fieldName}`
       let update = {$set: {[fieldQuery]: req.body.fieldValue}}
-      db.collection('tables').update(filter, update).then(function () {
+      db.collection('tables').updateOne(filter, update).then(function () {
         res.sendStatus(200)
       }).catch(onError)
     })
