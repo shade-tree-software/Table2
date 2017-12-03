@@ -272,7 +272,7 @@ export default class TableDetail extends React.Component {
         <br/>
         <h1>{this.state.tableName}</h1>
         <div className="form-check">
-          <label hidden={!this.sortingByDate()} className="form-check-label">
+          <label hidden={!this.sortingByDate()} className="form-check-label my-2">
             <input onChange={this.onColorPrefsChange} className="form-check-input" type="checkbox"
                    checked={this.state.colorCodedRows} value=""/>
             Use color-coded rows when sorting by date
@@ -302,8 +302,8 @@ export default class TableDetail extends React.Component {
             hideErrorBanner={this.props.hideErrorBanner}/>
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
-                                                        className="btn btn-primary btn-sm">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
-        <span className="form-group float-right">
+                                                        className="btn btn-primary btn-sm mb-3">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
+        <span className="form-group float-right mb-3">
           <FileUpload tableId={this.state.tableId} showErrorBanner={this.props.showErrorBanner}
                       hideErrorBanner={this.props.hideErrorBanner} updateTable={this.updateTable}/>
         </span>

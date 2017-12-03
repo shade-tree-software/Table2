@@ -55,7 +55,7 @@ export default class TableDetail extends React.Component {
       <form onSubmit={this.onSubmit} method="POST">
         <input ref={this.setFileInput} onChange={this.setCSVFilename} type="file" name="csvFiles[]" className="file"/>
         <span className="btn-toolbar">
-          <span className="btn-group">
+          <span className="btn-group mb-2">
             <span className="input-group">
               <span className="input-group-addon">Import CSV</span>
               <input type="text" className="form-control" onClick={this.clickFileInput} placeholder="Choose file..."
@@ -65,7 +65,7 @@ export default class TableDetail extends React.Component {
               </span>
             </span>
           </span>
-          <span className="btn-group">
+          <span className="btn-group mb-2">
             <button className="btn btn-primary ml-sm-1" disabled={this.state.csvFilename.length < 1}
                     ref={this.setSubmitButton}
                     type="submit">{this.state.submitButtonText}</button>
