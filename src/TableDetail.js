@@ -19,7 +19,9 @@ export default class TableDetail extends React.Component {
       tableId: '',
       isShowingModal: false,
       sortColumnId: '',
-      sortOrder: 'asc'
+      sortColumnName: '',
+      sortOrder: 'asc',
+      colorCodedRows: false
     }
     this.lastServerWrite = new Date(0)
   }
@@ -95,21 +97,21 @@ export default class TableDetail extends React.Component {
     })
   }
 
-  setSortCriteria = (sortColumnId, sortOrder) => {
+  setTablePreferences = (tablePreferences) => {
     this.logWriteEvent()
     fetch(`/api/tables/${this.state.tableId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
       },
       method: 'put',
-      body: JSON.stringify({values: {sortColumnId, sortOrder}})
+      body: JSON.stringify({values: tablePreferences})
     }).then((response) => {
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
         throw new Error(response.statusText)
       }
-      this.setState({sortColumnId, sortOrder})
+      this.setState(tablePreferences)
     }).catch((err) => {
       this.props.showErrorBanner(`Unable to save sort preferences to server (${err.message})`)
     })
@@ -146,9 +148,17 @@ export default class TableDetail extends React.Component {
       this.setState({insertColumnPosition: target.getAttribute('index')})
       this.showModal()
     } else if (data.command === 'sort-asc') {
-      this.setSortCriteria(target.getAttribute('column-id'), 'asc')
+      this.setTablePreferences({
+        sortColumnId: target.getAttribute('column-id'),
+        sortColumnName: target.getAttribute('column-name'),
+        sortOrder: 'asc'
+      })
     } else if (data.command === 'sort-desc') {
-      this.setSortCriteria(target.getAttribute('column-id'), 'desc')
+      this.setTablePreferences({
+        sortColumnId: target.getAttribute('column-id'),
+        sortColumnName: target.getAttribute('column-name'),
+        sortOrder: 'desc'
+      })
     }
   }
 
@@ -231,6 +241,13 @@ export default class TableDetail extends React.Component {
     }
   }
 
+  sortingByDate = () => (this.state.sortColumnName ? this.state.sortColumnName.toLowerCase().includes('date') : false)
+
+  onColorPrefsChange = (e) => {
+    console.log(e.target.checked)
+    this.setTablePreferences({colorCodedRows: e.target.checked})
+  }
+
   render() {
     return (
       <div>
@@ -254,13 +271,21 @@ export default class TableDetail extends React.Component {
         </ContextMenu>
         <br/>
         <h1>{this.state.tableName}</h1>
+        <div className="form-check">
+          <label hidden={!this.sortingByDate()} className="form-check-label">
+            <input onChange={this.onColorPrefsChange} className="form-check-input" type="checkbox"
+                   checked={this.state.colorCodedRows} value=""/>
+            Use color-coded rows when sorting by date
+          </label>
+        </div>
         <table className="table table-hover table-striped">
           <thead>
           <tr className="large-only">
             {this.state.columns.map((column, index) =>
               <th key={index} className="disable-ios-copy-paste">
-                <ContextMenuTrigger attributes={{'column-id': column.columnId, index: index}}
-                                    id="column-header-context-menu">{column.columnName}
+                <ContextMenuTrigger
+                  attributes={{'column-id': column.columnId, 'column-name': column.columnName, index: index}}
+                  id="column-header-context-menu">{column.columnName}
                   {this.sortLegend(column.columnId)}</ContextMenuTrigger>
               </th>
             )}
@@ -269,10 +294,11 @@ export default class TableDetail extends React.Component {
           </thead>
           <TableBody
             rows={this.state.rows} columns={this.state.columns} cells={this.state.cells} tableId={this.state.tableId}
-            onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortColumnId={this.state.sortColumnId}
-            sortOrder={this.state.sortOrder} showHiddenFields={this.showHiddenColumns}
-            logWriteEvent={this.logWriteEvent} changeColumnVisibility={this.changeColumnVisibility}
-            showErrorBanner={this.props.showErrorBanner}
+            onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortOrder={this.state.sortOrder}
+            sortColumnId={this.state.sortColumnId} sortingByDate={this.sortingByDate()}
+            colorCodedRows={this.state.colorCodedRows} showHiddenFields={this.showHiddenColumns}
+            sortByDate={this.sortByDate} logWriteEvent={this.logWriteEvent}
+            changeColumnVisibility={this.changeColumnVisibility} showErrorBanner={this.props.showErrorBanner}
             hideErrorBanner={this.props.hideErrorBanner}/>
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
