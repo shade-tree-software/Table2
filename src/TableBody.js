@@ -39,7 +39,7 @@ export default class TableBody extends React.Component {
     return rowColor
   }
 
-  render() {
+  sortRows = () => {
     let rows = {}
     this.props.rows.forEach((row) => {
       rows[row.rowId] = {}
@@ -49,13 +49,7 @@ export default class TableBody extends React.Component {
         rows[cell.rowId][cell.columnId] = {cellId: cell._id, cellText: cell.value}
       }
     })
-    let hiddenColumns = false
-    this.props.columns.forEach((column) => {
-      if (column.hiddenOnMobile) {
-        hiddenColumns = true
-      }
-    })
-    let sortedRows = Object.entries(rows).sort(([, rowDataA], [, rowDataB]) => {
+    return Object.entries(rows).sort(([, rowDataA], [, rowDataB]) => {
       let a, b
       if (this.props.sortingByDate) {
         let textA = rowDataA[this.props.sortColumnId] ? rowDataA[this.props.sortColumnId].cellText : ''
@@ -86,7 +80,16 @@ export default class TableBody extends React.Component {
       }
       return 0;
     })
-    let htmlRows = sortedRows.map(([rowId, rowData]) => {
+  }
+
+  rowsToHTML = (sortedRows) => {
+    let hiddenColumns = false
+    this.props.columns.forEach((column) => {
+      if (column.hiddenOnMobile) {
+        hiddenColumns = true
+      }
+    })
+    return sortedRows.map(([rowId, rowData]) => {
       let sortDateText = this.props.sortingByDate && rowData[this.props.sortColumnId] ? rowData[this.props.sortColumnId].cellText : null
       return (
         <tr className={`stackable ${this.rowColor(sortDateText)}`}
@@ -112,8 +115,11 @@ export default class TableBody extends React.Component {
         </tr>
       )
     })
+  }
+
+  render() {
     return (
-      <tbody>{htmlRows}</tbody>
+      <tbody>{this.rowsToHTML(this.sortRows())}</tbody>
     )
   }
 }
