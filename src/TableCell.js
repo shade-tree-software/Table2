@@ -11,6 +11,7 @@ export default class TableCell extends React.Component {
   okHandler = (cellValue) => {
     this.props.logWriteEvent()
     this.setState({editing: false})
+    this.props.startNetworkTimer()
     fetch(`/api/tables/${this.props.tableId}/rows/${this.props.rowId}/columns/${this.props.column.columnId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
@@ -18,6 +19,7 @@ export default class TableCell extends React.Component {
       method: 'put',
       body: JSON.stringify({cellValue})
     }).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {

@@ -10,6 +10,7 @@ export default class MainPage extends React.Component {
   }
 
   componentDidMount() {
+    this.props.startNetworkTimer()
     this.getTables()
     this.timerId = setInterval(this.getTables, 10000)
   }
@@ -20,6 +21,7 @@ export default class MainPage extends React.Component {
 
   getTables = () => {
     fetch('api/tables?token=' + localStorage.authToken).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
@@ -34,6 +36,7 @@ export default class MainPage extends React.Component {
   }
 
   addNewTable = (tableName) => {
+    this.props.startNetworkTimer()
     fetch('api/tables?token=' + localStorage.authToken, {
       headers: {
         'Content-Type': 'application/json'
@@ -41,6 +44,7 @@ export default class MainPage extends React.Component {
       method: 'post',
       body: JSON.stringify({tableName})
     }).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
@@ -55,12 +59,14 @@ export default class MainPage extends React.Component {
   deleteTable = (_id) => {
     // NOTE: Note used
     // TODO: figure out what to do if another session is currently viewing this table
+    this.props.startNetworkTimer()
     fetch('api/tables/' + _id + '?token=' + localStorage.authToken, {
       headers: {
         'Content-Type': 'application/json'
       },
       method: 'delete'
     }).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {

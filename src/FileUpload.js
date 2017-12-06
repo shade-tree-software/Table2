@@ -33,10 +33,12 @@ export default class TableDetail extends React.Component {
   }
 
   uploadFile = (e) => {
+    this.props.startNetworkTimer()
     fetch(`/api/tables/${this.props.tableId}/csv?token=${localStorage.authToken}`, {
       method: 'post',
       body: e.currentTarget.result
     }).then((response) => {
+      this.props.stopNetworkTimer()
       this.setState({submitButtonText: 'Upload'})
       if (response.ok) {
         this.props.hideErrorBanner()

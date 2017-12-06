@@ -11,6 +11,7 @@ export default class LoginForm extends React.Component {
   submitHandler = (e) => {
     e.preventDefault();
     this.setState(LoginForm.defaultState)
+    this.props.startNetworkTimer()
     fetch('api/authenticate', {
       headers: {
         'Content-Type': 'application/json'
@@ -18,6 +19,7 @@ export default class LoginForm extends React.Component {
       method: 'post',
       body: JSON.stringify(this.state)
     }).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
@@ -38,36 +40,38 @@ export default class LoginForm extends React.Component {
 
   render() {
     return (
-      <form onSubmit={this.submitHandler}>
-        <br/>
-        <div className="row">
-          <div className="col-lg-3 col-md-4 col-sm-5">
-            <input name="username"
-                   autoCapitalize="none"
-                   className="form-control"
-                   placeholder="username"
-                   value={this.state.username}
-                   onChange={this.changeHandler}/><br/>
+      <div>
+        <form onSubmit={this.submitHandler}>
+          <br/>
+          <div className="row">
+            <div className="col-lg-3 col-md-4 col-sm-5">
+              <input name="username"
+                     autoCapitalize="none"
+                     className="form-control"
+                     placeholder="username"
+                     value={this.state.username}
+                     onChange={this.changeHandler}/><br/>
+            </div>
           </div>
-        </div>
-        <div className="row">
-          <div className="col-lg-3 col-md-4 col-sm-5">
-            <input name="password"
-                   type="password"
-                   className="form-control"
-                   placeholder="password"
-                   value={this.state.password}
-                   onChange={this.changeHandler}/><br/>
+          <div className="row">
+            <div className="col-lg-3 col-md-4 col-sm-5">
+              <input name="password"
+                     type="password"
+                     className="form-control"
+                     placeholder="password"
+                     value={this.state.password}
+                     onChange={this.changeHandler}/><br/>
+            </div>
           </div>
-        </div>
-        <div className="row">
-          <div className="col-lg-3 col-md-4 col-sm-5">
-            <button type="submit"
-                    className="btn btn-primary float-right">Login
-            </button>
+          <div className="row">
+            <div className="col-lg-3 col-md-4 col-sm-5">
+              <button type="submit"
+                      className="btn btn-primary float-right">Login
+              </button>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     )
   }
 }

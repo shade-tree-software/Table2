@@ -4,13 +4,13 @@ import {NavLink} from 'react-router-dom'
 export default class NavBar extends React.Component {
   logout = (e) => {
     e.preventDefault()
-    sessionStorage.removeItem('authToken')
+    localStorage.removeItem('authToken')
     this.props.history.push('/login')
   }
 
   render() {
     let path = this.props.location.pathname
-    if (path === '/' || path === '/login' || path === '/login/') {
+    if (path === '/login' || path === '/login/') {
       return (
         <nav className="navbar navbar-expand-sm bg-light">
           <a className="navbar-brand" href="/">Table Two</a>
@@ -22,7 +22,7 @@ export default class NavBar extends React.Component {
           <a className="navbar-brand" href="/">Table Two</a>
           <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                   aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon"></span>
+            <span className="navbar-toggler-icon"/>
           </button>
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             <div className="navbar-nav ml-auto">

@@ -6,9 +6,11 @@ export default class TableBody extends React.Component {
   onDeleteRowClick = (e, rowId) => {
     if (window.confirm('Are you sure?')) {
       this.props.logWriteEvent()
+      this.props.startNetworkTimer()
       fetch(`/api/tables/${this.props.tableId}/rows/${rowId}?token=${localStorage.authToken}`, {
         method: 'delete',
       }).then((response) => {
+        this.props.stopNetworkTimer()
         if (response.ok) {
           this.props.hideErrorBanner()
         } else {
@@ -104,7 +106,9 @@ export default class TableBody extends React.Component {
                      logWriteEvent={this.props.logWriteEvent}
                      changeColumnVisibility={this.props.changeColumnVisibility}
                      showErrorBanner={this.props.showErrorBanner}
-                     hideErrorBanner={this.props.hideErrorBanner}/>
+                     hideErrorBanner={this.props.hideErrorBanner}
+                     startNetworkTimer={this.props.startNetworkTimer}
+                     stopNetworkTimer={this.props.stopNetworkTimer}/>
         ))}
           <td>
             <button onClick={(e) => this.onDeleteRowClick(e, rowId)} className="btn btn-danger btn-sm">X</button>

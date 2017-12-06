@@ -7,7 +7,9 @@ export default class About extends React.Component {
   }
 
   componentDidMount(){
+    this.props.startNetworkTimer()
     fetch('api/version?token=' + localStorage.authToken).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {

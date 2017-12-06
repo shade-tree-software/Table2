@@ -27,6 +27,7 @@ export default class TableDetail extends React.Component {
   }
 
   componentDidMount() {
+    this.props.startNetworkTimer()
     this.getTableDetails()
     this.timer = setInterval(() => {
       // Give MongoDB time to sync write data to all shards so we don't get stale data
@@ -63,6 +64,7 @@ export default class TableDetail extends React.Component {
 
   getTableDetails = () => {
     fetch('/api/tables/' + this.props.match.params._id + '?token=' + localStorage.authToken).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
@@ -76,12 +78,14 @@ export default class TableDetail extends React.Component {
 
   addNewRow = (e) => {
     this.logWriteEvent()
+    this.props.startNetworkTimer()
     fetch(`/api/tables/${this.props.match.params._id}/rows?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
       },
       method: 'post'
     }).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
@@ -99,6 +103,7 @@ export default class TableDetail extends React.Component {
 
   setTablePreferences = (tablePreferences) => {
     this.logWriteEvent()
+    this.props.startNetworkTimer()
     fetch(`/api/tables/${this.state.tableId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
@@ -106,6 +111,7 @@ export default class TableDetail extends React.Component {
       method: 'put',
       body: JSON.stringify({values: tablePreferences})
     }).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
@@ -119,6 +125,7 @@ export default class TableDetail extends React.Component {
 
   changeColumnVisibility = (columnId, hiddenOnMobile) => {
     this.logWriteEvent()
+    this.props.startNetworkTimer()
     fetch(`/api/tables/${this.state.tableId}/columns/${columnId}?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
@@ -126,6 +133,7 @@ export default class TableDetail extends React.Component {
       method: 'put',
       body: JSON.stringify({fieldName: 'hiddenOnMobile', fieldValue: hiddenOnMobile})
     }).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
@@ -173,9 +181,11 @@ export default class TableDetail extends React.Component {
   deleteColumn = (columnId) => {
     if (window.confirm('Are you sure?')) {
       this.logWriteEvent()
+      this.props.startNetworkTimer()
       fetch(`/api/tables/${this.props.match.params._id}/columns/${columnId}?token=${localStorage.authToken}`, {
         method: 'delete',
       }).then((response) => {
+        this.props.stopNetworkTimer()
         if (response.ok) {
           this.props.hideErrorBanner()
         } else {
@@ -191,6 +201,7 @@ export default class TableDetail extends React.Component {
 
   insertColumn = (columnName, position) => {
     this.logWriteEvent()
+    this.props.startNetworkTimer()
     fetch(`/api/tables/${this.props.match.params._id}/columns?token=${localStorage.authToken}`, {
       headers: {
         'Content-Type': 'application/json'
@@ -198,6 +209,7 @@ export default class TableDetail extends React.Component {
       method: 'post',
       body: JSON.stringify({columnName, position})
     }).then((response) => {
+      this.props.stopNetworkTimer()
       if (response.ok) {
         this.props.hideErrorBanner()
       } else {
@@ -299,13 +311,17 @@ export default class TableDetail extends React.Component {
             colorCodedRows={this.state.colorCodedRows} showHiddenFields={this.showHiddenColumns}
             sortByDate={this.sortByDate} logWriteEvent={this.logWriteEvent}
             changeColumnVisibility={this.changeColumnVisibility} showErrorBanner={this.props.showErrorBanner}
-            hideErrorBanner={this.props.hideErrorBanner}/>
+            hideErrorBanner={this.props.hideErrorBanner}
+            startNetworkTimer={this.props.startNetworkTimer}
+            stopNetworkTimer={this.props.stopNetworkTimer}/>
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm mb-3">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
         <span className="form-group float-right mb-3">
           <FileUpload tableId={this.state.tableId} showErrorBanner={this.props.showErrorBanner}
-                      hideErrorBanner={this.props.hideErrorBanner} updateTable={this.updateTable}/>
+                      hideErrorBanner={this.props.hideErrorBanner}
+                      startNetworkTimer={this.props.startNetworkTimer}
+                      stopNetworkTimer={this.props.stopNetworkTimer} updateTable={this.updateTable}/>
         </span>
       </div>
     )
