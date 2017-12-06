@@ -48,3 +48,7 @@ html {
   visibility: hidden;
   position: absolute;
 }
+
+.z-auto {
+  z-index: auto !important;
+}

@@ -60,10 +60,10 @@ export default class TableDetail extends React.Component {
           <span className="btn-group mb-2">
             <span className="input-group">
               <span className="input-group-addon">Import CSV</span>
-              <input type="text" className="form-control" onClick={this.clickFileInput} placeholder="Choose file..."
+              <input type="text" className="form-control z-auto" onClick={this.clickFileInput} placeholder="Choose file..."
                      value={this.state.csvFilename.replace(/C:\\fakepath\\/i, '')}/>
               <span className="input-group-btn">
-                <button className="btn btn-primary" onClick={this.clickFileInput} type="button">Browse</button>
+                <button className="btn btn-primary z-auto" onClick={this.clickFileInput} type="button">Browse</button>
               </span>
             </span>
           </span>
