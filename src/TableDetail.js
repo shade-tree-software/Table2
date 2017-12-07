@@ -1,11 +1,12 @@
 import React from 'react'
-import {ContextMenu, MenuItem, ContextMenuTrigger} from "react-contextmenu";
+import {ContextMenu, MenuItem} from "react-contextmenu";
 import Modal from 'react-modal';
 
 import AddColumnButton from './AddColumnButton'
 import TextBoxForm from './TextBoxForm'
 import TableBody from './TableBody'
 import FileUpload from './FileUpload'
+import ColumnHeader from './ColumnHeader'
 import './ReactContextMenu.css'
 
 export default class TableDetail extends React.Component {
@@ -236,13 +237,24 @@ export default class TableDetail extends React.Component {
     this.setState((prevState) => ({rows: [...prevState.rows.slice(0, index), ...prevState.rows.slice(index + 1)]}))
   }
 
-  onCellChanged = (cell) => {
+  onCellChanged = (changedCell) => {
     this.setState((prevState) => {
-      let index = prevState.cells.findIndex((elem) => (elem._id === cell._id))
+      let index = prevState.cells.findIndex((originalCell) => (originalCell._id === changedCell._id))
       if (index >= 0) {
-        return ({cells: [...prevState.cells.slice(0, index), cell, ...prevState.cells.slice(index + 1)]})
+        return ({cells: [...prevState.cells.slice(0, index), changedCell, ...prevState.cells.slice(index + 1)]})
       } else {
-        return ({cells: [...prevState.cells, cell]})
+        return ({cells: [...prevState.cells, changedCell]})
+      }
+    })
+  }
+
+  onColumnRenamed = (renamedColumn) => {
+    this.setState((prevState) => {
+      let index = prevState.columns.findIndex((originalColumn) => (originalColumn.columnId === renamedColumn.columnId))
+      if (index >= 0) {
+        return ({columns: [...prevState.columns.slice(0, index), renamedColumn, ...prevState.columns.slice(index + 1)]})
+      } else {
+        return ({columns: [...prevState.columns, renamedColumn]})
       }
     })
   }
@@ -294,12 +306,12 @@ export default class TableDetail extends React.Component {
           <thead>
           <tr className="large-only">
             {this.state.columns.map((column, index) =>
-              <th key={index} className="disable-ios-copy-paste">
-                <ContextMenuTrigger
-                  attributes={{'column-id': column.columnId, 'column-name': column.columnName, index: index}}
-                  id="column-header-context-menu">{column.columnName}
-                  {this.sortLegend(column.columnId)}</ContextMenuTrigger>
-              </th>
+              <ColumnHeader tableId={this.state.tableId} column={column} index={index} sortLegend={this.sortLegend}
+                            onColumnRenamed={this.onColumnRenamed}
+                            logWriteEvent={this.logWriteEvent} showErrorBanner={this.props.showErrorBanner}
+                            hideErrorBanner={this.props.hideErrorBanner}
+                            startNetworkTimer={this.props.startNetworkTimer}
+                            stopNetworkTimer={this.props.stopNetworkTimer}/>
             )}
             <th><AddColumnButton insertColumn={this.insertColumn} isFirstColumn={this.state.columns.length === 0}/></th>
           </tr>
@@ -309,10 +321,9 @@ export default class TableDetail extends React.Component {
             onRowDeleted={this.onRowDeleted} onCellChanged={this.onCellChanged} sortOrder={this.state.sortOrder}
             sortColumnId={this.state.sortColumnId} sortingByDate={this.sortingByDate()}
             colorCodedRows={this.state.colorCodedRows} showHiddenFields={this.showHiddenColumns}
-            sortByDate={this.sortByDate} logWriteEvent={this.logWriteEvent}
-            changeColumnVisibility={this.changeColumnVisibility} showErrorBanner={this.props.showErrorBanner}
-            hideErrorBanner={this.props.hideErrorBanner}
-            startNetworkTimer={this.props.startNetworkTimer}
+            sortByDate={this.sortByDate} changeColumnVisibility={this.changeColumnVisibility}
+            logWriteEvent={this.logWriteEvent} showErrorBanner={this.props.showErrorBanner}
+            hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
             stopNetworkTimer={this.props.stopNetworkTimer}/>
         </table>
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}

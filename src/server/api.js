@@ -193,6 +193,17 @@ export default function (db) {
     })
 
 
+  api.route('/tables/:tableId/columns/:columnId/rename')
+  // Rename a column
+    .put(function (req, res) {
+      let columnId = new mongodb.ObjectID(req.params.columnId)
+      let filter = {_id: new mongodb.ObjectID(req.params.tableId), 'columns.columnId': columnId}
+      let update = {$set: {'columns.$.columnName': Crypt.encrypt(req.body.columnName)}}
+      db.collection('tables').updateOne(filter, update).then(function () {
+        res.sendStatus(200)
+      }).catch(onError)
+    })
+
   api.route('/tables/:tableId/columns/:columnId')
   // Update a column field
   // NOTE: this will not work for updating the columnName because column names are encrypted
