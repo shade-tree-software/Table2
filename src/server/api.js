@@ -149,8 +149,7 @@ export default function (db) {
     // NOT USED
     // TODO: add delete table option on GUI and delete corresponding cells when deleting table
     .delete(function (req, res) {
-      let filter = {_id: new mongodb.ObjectID(req.params.tableId)}
-      db.collection('tables').deleteOne(filter).then(function () {
+      dbFuncs.deleteTable(req.params.tableId).then(()=>{
         res.sendStatus(200)
       }).catch(onError)
     })

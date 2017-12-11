@@ -8,7 +8,12 @@ export default class TableList extends React.Component {
       this.props.tables.map((table) =>
         <TableListItem key={table._id}
                        history={this.props.history}
-                       table={table}/>
+                       table={table}
+                       showErrorBanner={this.props.showErrorBanner}
+                       hideErrorBanner={this.props.hideErrorBanner}
+                       startNetworkTimer={this.props.startNetworkTimer}
+                       stopNetworkTimer={this.props.stopNetworkTimer}
+                       onTableDeleted={this.props.onTableDeleted}/>
       )
     return (
       <div>

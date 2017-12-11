@@ -56,26 +56,12 @@ export default class MainPage extends React.Component {
     })
   }
 
-  deleteTable = (_id) => {
-    // NOTE: Note used
+  onTableDeleted = (tableId) => {
     // TODO: figure out what to do if another session is currently viewing this table
-    this.props.startNetworkTimer()
-    fetch('api/tables/' + _id + '?token=' + localStorage.authToken, {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      method: 'delete'
-    }).then((response) => {
-      this.props.stopNetworkTimer()
-      if (response.ok) {
-        this.props.hideErrorBanner()
-      } else {
-        throw new Error(response.statusText)
-      }
-      this.getTables()
-    }).catch((err) => {
-      this.props.showErrorBanner(`Unable to delete table from server (${err.message})`)
-    })
+    clearInterval(this.timerId);
+    let index = this.state.tables.findIndex((table) => (table._id === tableId))
+    this.setState((prevState) => ({tables: [...prevState.tables.slice(0, index), ...prevState.tables.slice(index + 1)]}))
+    this.timerId = setInterval(this.getTables, 10000)
   }
 
   render() {
@@ -85,7 +71,10 @@ export default class MainPage extends React.Component {
         <NewTableForm addNewTable={this.addNewTable}/>
         <br/>
         <br/>
-        <TableList history={this.props.history} tables={this.state.tables}/>
+        <TableList history={this.props.history} tables={this.state.tables}
+                   showErrorBanner={this.props.showErrorBanner} hideErrorBanner={this.props.hideErrorBanner}
+                   startNetworkTimer={this.props.startNetworkTimer} stopNetworkTimer={this.props.stopNetworkTimer}
+                   onTableDeleted={this.onTableDeleted}/>
       </div>
     )
   }

@@ -27,6 +27,20 @@ export default class DBFuncs {
     })
   }
 
+  deleteTable = (tableId) => {
+    let db = this.db
+    return new Promise((fulfill, reject) => {
+      co(function* () {
+        let filter = {_id: new mongodb.ObjectID(tableId)}
+        let table = yield db.collection('tables').findOne(filter)
+        let rowIds = table.rows ? table.rows.map((row) => (row.rowId)) : []
+        yield db.collection('cells').deleteMany({rowId: {$in: rowIds}})
+        yield db.collection('tables').deleteOne(filter)
+        fulfill()
+      }).catch(reject);
+    })
+  }
+
   addColumn = (tableId, columnNamePlaintext, columnPosition) => {
     return new Promise((fulfill, reject) => {
       let filter = {_id: new mongodb.ObjectID(tableId)}
