@@ -21,7 +21,7 @@ export default class ExportCSV extends React.Component {
     this.props.getSortedRows().forEach(([rowId, rowData]) => {
       this.props.columns.forEach((column, index) => {
         csvText += index === 0 ? '\n' : ','
-        let data = rowData[column.columnId] ? rowData[column.columnId].cellText : ''
+        let data = rowData[column.columnId] ? rowData[column.columnId].cellText.trim() : ''
         let dataContainsCommas = data.includes(',')
         csvText += dataContainsCommas ? '"' : ''
         csvText += data
