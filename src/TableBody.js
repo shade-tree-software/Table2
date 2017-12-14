@@ -41,49 +41,6 @@ export default class TableBody extends React.Component {
     return rowColor
   }
 
-  sortRows = () => {
-    let rows = {}
-    this.props.rows.forEach((row) => {
-      rows[row.rowId] = {}
-    })
-    this.props.cells.forEach((cell) => {
-      if (rows[cell.rowId]) {
-        rows[cell.rowId][cell.columnId] = {cellId: cell._id, cellText: cell.value}
-      }
-    })
-    return Object.entries(rows).sort(([, rowDataA], [, rowDataB]) => {
-      let a, b
-      if (this.props.sortingByDate) {
-        let textA = rowDataA[this.props.sortColumnId] ? rowDataA[this.props.sortColumnId].cellText : ''
-        let textB = rowDataB[this.props.sortColumnId] ? rowDataB[this.props.sortColumnId].cellText : ''
-        let dateA = new Date(textA)
-        let dateB = new Date(textB)
-        let dateAisValid = dateA.toString() !== 'Invalid Date'
-        let dateBisValid = dateB.toString() !== 'Invalid Date'
-        if (dateAisValid && dateBisValid) {
-          a = dateA
-          b = dateB
-        } else if (!dateAisValid && !dateBisValid) {
-          a = textA
-          b = textB
-        } else {
-          a = dateAisValid ? dateA : new Date(0)
-          b = dateBisValid ? dateB : new Date(0)
-        }
-      } else {
-        a = rowDataA[this.props.sortColumnId] ? rowDataA[this.props.sortColumnId].cellText : ''
-        b = rowDataB[this.props.sortColumnId] ? rowDataB[this.props.sortColumnId].cellText : ''
-      }
-      if (a < b) {
-        return this.props.sortOrder === 'asc' ? -1 : 1;
-      }
-      if (a > b) {
-        return this.props.sortOrder === 'asc' ? 1 : -1;
-      }
-      return 0;
-    })
-  }
-
   rowsToHTML = (sortedRows) => {
     let hiddenColumns = false
     this.props.columns.forEach((column) => {
@@ -123,7 +80,7 @@ export default class TableBody extends React.Component {
 
   render() {
     return (
-      <tbody>{this.rowsToHTML(this.sortRows())}</tbody>
+      <tbody>{this.rowsToHTML(this.props.getSortedRows())}</tbody>
     )
   }
 }

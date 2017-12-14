@@ -5,8 +5,9 @@ import Modal from 'react-modal';
 import AddColumnButton from './AddColumnButton'
 import TextBoxForm from './TextBoxForm'
 import TableBody from './TableBody'
-import FileUpload from './FileUpload'
+import ImportCSV from './ImportCSV'
 import ColumnHeader from './ColumnHeader'
+import ExportCSV from "./ExportCSV"
 import './ReactContextMenu.css'
 
 export default class TableDetail extends React.Component {
@@ -272,6 +273,82 @@ export default class TableDetail extends React.Component {
     this.setTablePreferences({colorCodedRows: e.target.checked})
   }
 
+  getSortedRows = () => {
+    let rows = {}
+    this.state.rows.forEach((row) => {
+      rows[row.rowId] = {}
+    })
+    this.state.cells.forEach((cell) => {
+      if (rows[cell.rowId]) {
+        rows[cell.rowId][cell.columnId] = {cellId: cell._id, cellText: cell.value}
+      }
+    })
+    return Object.entries(rows).sort(([, rowDataA], [, rowDataB]) => {
+      let a, b
+      if (this.sortingByDate()) {
+        let textA = rowDataA[this.state.sortColumnId] ? rowDataA[this.state.sortColumnId].cellText : ''
+        let textB = rowDataB[this.state.sortColumnId] ? rowDataB[this.state.sortColumnId].cellText : ''
+        let dateA = new Date(textA)
+        let dateB = new Date(textB)
+        let dateAisValid = dateA.toString() !== 'Invalid Date'
+        let dateBisValid = dateB.toString() !== 'Invalid Date'
+        if (dateAisValid && dateBisValid) {
+          a = dateA
+          b = dateB
+        } else if (!dateAisValid && !dateBisValid) {
+          a = textA
+          b = textB
+        } else {
+          a = dateAisValid ? dateA : new Date(0)
+          b = dateBisValid ? dateB : new Date(0)
+        }
+      } else {
+        a = rowDataA[this.state.sortColumnId] ? rowDataA[this.state.sortColumnId].cellText : ''
+        b = rowDataB[this.state.sortColumnId] ? rowDataB[this.state.sortColumnId].cellText : ''
+      }
+      if (a < b) {
+        return this.state.sortOrder === 'asc' ? -1 : 1;
+      }
+      if (a > b) {
+        return this.state.sortOrder === 'asc' ? 1 : -1;
+      }
+      return 0;
+    })
+  }
+
+  saveCSVFileToDisk = (csvText) => {
+    let element = document.createElement('a');
+    element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvText));
+    element.setAttribute('download', `${this.state.tableName}.csv`);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  }
+
+  generateCSVText = () => {
+    let csvText = ''
+    this.state.columns.forEach((column, index) => {
+      csvText += index === 0 ? '' : ','
+      csvText += column.columnName
+    })
+    this.getSortedRows().forEach(([rowId, rowData]) => {
+      this.state.columns.forEach((column, index) => {
+        csvText += index === 0 ? '\n' : ','
+        let data = rowData[column.columnId] ? rowData[column.columnId].cellText : ''
+        let dataContainsCommas = data.includes(',')
+        csvText += dataContainsCommas ? '"' : ''
+        csvText += data
+        csvText += dataContainsCommas ? '"' : ''
+      })
+    })
+    return csvText
+  }
+
+  exportCSV = () => {
+    this.saveCSVFileToDisk(this.generateCSVText())
+  }
+
   render() {
     return (
       <div>
@@ -306,7 +383,8 @@ export default class TableDetail extends React.Component {
           <thead>
           <tr className="large-only">
             {this.state.columns.map((column, index) =>
-              <ColumnHeader tableId={this.state.tableId} column={column} index={index} sortLegend={this.sortLegend}
+              <ColumnHeader key={index} tableId={this.state.tableId} column={column} index={index}
+                            sortLegend={this.sortLegend}
                             onColumnRenamed={this.onColumnRenamed}
                             logWriteEvent={this.logWriteEvent} showErrorBanner={this.props.showErrorBanner}
                             hideErrorBanner={this.props.hideErrorBanner}
@@ -322,6 +400,7 @@ export default class TableDetail extends React.Component {
             sortColumnId={this.state.sortColumnId} sortingByDate={this.sortingByDate()}
             colorCodedRows={this.state.colorCodedRows} showHiddenFields={this.showHiddenColumns}
             sortByDate={this.sortByDate} changeColumnVisibility={this.changeColumnVisibility}
+            getSortedRows={this.getSortedRows}
             logWriteEvent={this.logWriteEvent} showErrorBanner={this.props.showErrorBanner}
             hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
             stopNetworkTimer={this.props.stopNetworkTimer}/>
@@ -329,13 +408,13 @@ export default class TableDetail extends React.Component {
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm mb-3">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
         <span className="form-group float-right mb-3">
-          <FileUpload tableId={this.state.tableId} showErrorBanner={this.props.showErrorBanner}
-                      hideErrorBanner={this.props.hideErrorBanner}
-                      startNetworkTimer={this.props.startNetworkTimer}
-                      stopNetworkTimer={this.props.stopNetworkTimer} updateTable={this.updateTable}/>
+          <ImportCSV tableId={this.state.tableId} showErrorBanner={this.props.showErrorBanner}
+                     hideErrorBanner={this.props.hideErrorBanner}
+                     startNetworkTimer={this.props.startNetworkTimer}
+                     stopNetworkTimer={this.props.stopNetworkTimer} updateTable={this.updateTable}/>
         </span>
         <br/><br/>
-        <button className="btn btn-primary ml-sm-1 float-right">Export CSV</button>
+        <ExportCSV tableName={this.state.tableName} columns={this.state.columns} getSortedRows={this.getSortedRows}/>
       </div>
     )
   }

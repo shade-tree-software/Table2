@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class TableDetail extends React.Component {
+export default class ImportCSV extends React.Component {
   constructor(props) {
     super(props)
     this.state = {csvFilename: '', submitButtonText: 'Upload'}
