@@ -334,6 +334,8 @@ export default class TableDetail extends React.Component {
                       startNetworkTimer={this.props.startNetworkTimer}
                       stopNetworkTimer={this.props.stopNetworkTimer} updateTable={this.updateTable}/>
         </span>
+        <br/><br/>
+        <button className="btn btn-primary ml-sm-1 float-right">Export CSV</button>
       </div>
     )
   }
