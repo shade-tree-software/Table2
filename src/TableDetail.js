@@ -1,13 +1,13 @@
 import React from 'react'
 import {ContextMenu, MenuItem} from "react-contextmenu";
 import Modal from 'react-modal';
+import {Link} from 'react-router-dom'
 
 import AddColumnButton from './AddColumnButton'
 import TextBoxForm from './TextBoxForm'
 import TableBody from './TableBody'
-import ImportCSV from './ImportCSV'
 import ColumnHeader from './ColumnHeader'
-import ExportCSV from "./ExportCSV"
+import TableFooter from "./TableFooter"
 import './ReactContextMenu.css'
 
 export default class TableDetail extends React.Component {
@@ -23,7 +23,8 @@ export default class TableDetail extends React.Component {
       sortColumnId: '',
       sortColumnName: '',
       sortOrder: 'asc',
-      colorCodedRows: false
+      colorCodedRows: false,
+      printView: false
     }
     this.lastServerWrite = new Date(0)
   }
@@ -41,6 +42,16 @@ export default class TableDetail extends React.Component {
 
   componentWillUnmount() {
     clearTimeout(this.timer)
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.location !== prevProps.location) {
+      this.updateView();
+    }
+  }
+
+  updateView = () => {
+    this.setState((prevState) => ({printView: (new URLSearchParams(this.props.location.search)).get('printview') === 'true'}))
   }
 
   logWriteEvent = () => {
@@ -261,7 +272,7 @@ export default class TableDetail extends React.Component {
   }
 
   sortLegend = (columnId) => {
-    if (columnId === this.state.sortColumnId) {
+    if (columnId === this.state.sortColumnId && !this.state.printView) {
       return this.state.sortOrder === 'asc' ? <span> &#x25B2;</span> : <span> &#x25BC;</span>
     }
   }
@@ -372,13 +383,15 @@ export default class TableDetail extends React.Component {
         </ContextMenu>
         <br/>
         <h1>{this.state.tableName}</h1>
-        <div className="form-check">
-          <label hidden={!this.sortingByDate()} className="form-check-label my-2">
+        <span className="form-check d-inline">
+          <label hidden={!this.sortingByDate() || this.state.printView} className="form-check-label my-2">
             <input onChange={this.onColorPrefsChange} className="form-check-input" type="checkbox"
                    checked={this.state.colorCodedRows} value=""/>
             Use color-coded rows when sorting by date
           </label>
-        </div>
+        </span>
+        <Link className="float-right large-only my-2" hidden={this.state.printView}
+              to={`/tables/${this.state.tableId}?printview=true`}>printer-friendly view</Link>
         <table className="table table-hover table-striped">
           <thead>
           <tr className="large-only">
@@ -391,7 +404,8 @@ export default class TableDetail extends React.Component {
                             startNetworkTimer={this.props.startNetworkTimer}
                             stopNetworkTimer={this.props.stopNetworkTimer}/>
             )}
-            <th><AddColumnButton insertColumn={this.insertColumn} isFirstColumn={this.state.columns.length === 0}/></th>
+            <th><AddColumnButton hidden={this.state.printView} insertColumn={this.insertColumn}
+                                 isFirstColumn={this.state.columns.length === 0}/></th>
           </tr>
           </thead>
           <TableBody
@@ -400,21 +414,16 @@ export default class TableDetail extends React.Component {
             sortColumnId={this.state.sortColumnId} sortingByDate={this.sortingByDate()}
             colorCodedRows={this.state.colorCodedRows} showHiddenFields={this.showHiddenColumns}
             sortByDate={this.sortByDate} changeColumnVisibility={this.changeColumnVisibility}
-            getSortedRows={this.getSortedRows}
+            getSortedRows={this.getSortedRows} printView={this.state.printView}
             logWriteEvent={this.logWriteEvent} showErrorBanner={this.props.showErrorBanner}
             hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
             stopNetworkTimer={this.props.stopNetworkTimer}/>
         </table>
-        {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
-                                                        className="btn btn-primary btn-sm mb-3">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
-        <span className="form-group float-right mb-3">
-          <ImportCSV tableId={this.state.tableId} showErrorBanner={this.props.showErrorBanner}
-                     hideErrorBanner={this.props.hideErrorBanner}
-                     startNetworkTimer={this.props.startNetworkTimer}
-                     stopNetworkTimer={this.props.stopNetworkTimer} updateTable={this.updateTable}/>
-        </span>
-        <br/><br/>
-        <ExportCSV tableName={this.state.tableName} columns={this.state.columns} getSortedRows={this.getSortedRows}/>
+        <TableFooter tableId={this.state.tableId} tableName={this.state.tableName} rows={this.state.rows}
+                     columns={this.state.columns} addNewRow={this.addNewRow} getSortedRows={this.getSortedRows}
+                     updateTable={this.updateView} showErrorBanner={this.props.showErrorBanner}
+                     hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
+                     stopNetworkTimer={this.props.stopNetworkTimer} hidden={this.state.printView}/>
       </div>
     )
   }

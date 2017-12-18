@@ -68,7 +68,9 @@ export default class TableBody extends React.Component {
                      stopNetworkTimer={this.props.stopNetworkTimer}/>
         ))}
           <td>
-            <button onClick={(e) => this.onDeleteRowClick(e, rowId)} className="btn btn-danger btn-sm">X</button>
+            <button hidden={this.props.printView} onClick={(e) => this.onDeleteRowClick(e, rowId)}
+                    className="btn btn-danger btn-sm">X
+            </button>
             <button onClick={this.props.showHiddenFields} hidden={!hiddenColumns}
                     className="btn btn-warning btn-sm float-right small-only">Show Hidden Fields
             </button>
