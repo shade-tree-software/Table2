@@ -11,6 +11,9 @@
 }
 
 @media only screen and (min-width: 576px) {
+  .small-only {
+    display: none;
+  }
   .btn.small-only {
     display: none;
   }
