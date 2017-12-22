@@ -63,7 +63,7 @@ export default class TableCell extends React.Component {
     } else {
       return (
         <td onClick={this.onCellClick} className={this.props.column.hiddenOnMobile ? 'large-only' : ''}>
-          <span className="small-only bold-text">{this.props.column.columnName}: </span>{this.props.text}
+          <span hidden={this.props.printView} className="small-only bold-text">{this.props.column.columnName}: </span>{this.props.text}
           <button onClick={this.onHideColumn} hidden={this.props.printView}
                   className="btn btn-warning btn-sm float-right small-only">&lt;</button>
         </td>
