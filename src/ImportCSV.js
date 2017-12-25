@@ -68,7 +68,7 @@ export default class ImportCSV extends React.Component {
             </span>
           </span>
           <span className="btn-group mb-2">
-            <button className="btn btn-primary ml-sm-1" disabled={this.state.csvFilename.length < 1}
+            <button className="btn btn-primary ml-1" disabled={this.state.csvFilename.length < 1}
                     ref={this.setSubmitButton}
                     type="submit">{this.state.submitButtonText}</button>
           </span>

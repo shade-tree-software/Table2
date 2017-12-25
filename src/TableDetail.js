@@ -371,8 +371,8 @@ export default class TableDetail extends React.Component {
           </MenuItem>
         </ContextMenu>
         <br/>
-        <h1>{this.state.tableName}</h1>
-        <div className="form-check">
+        <h1 className="margin-small">{this.state.tableName}</h1>
+        <div className="form-check margin-small">
           <label hidden={!this.sortingByDate()} className="form-check-label my-2">
             <input onChange={this.onColorPrefsChange} className="form-check-input" type="checkbox"
                    checked={this.state.colorCodedRows} value=""/>
@@ -405,6 +405,7 @@ export default class TableDetail extends React.Component {
             hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
             stopNetworkTimer={this.props.stopNetworkTimer}/>
         </table>
+        <div className="margin-small">
         {this.state.columns.length === 0 ? '' : <button onClick={this.addNewRow}
                                                         className="btn btn-primary btn-sm mb-3">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
         <span className="form-group float-right mb-3">
@@ -415,6 +416,7 @@ export default class TableDetail extends React.Component {
         </span>
         <br/><br/>
         <ExportCSV tableName={this.state.tableName} columns={this.state.columns} getSortedRows={this.getSortedRows}/>
+        </div>
       </div>
     )
   }

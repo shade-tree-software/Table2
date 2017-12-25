@@ -25,7 +25,7 @@ export default class About extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="margin-small">
         <h1>About</h1>
         <p>version {this.state.version}</p>
       </div>
