@@ -17,7 +17,7 @@ export default class TableList extends React.Component {
       )
     return (
       <div>
-        <h3>Tables</h3>
+        <h3 className="margin-small">Tables</h3>
         <ul className="list-group">
           {listItems}
         </ul>

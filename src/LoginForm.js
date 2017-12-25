@@ -63,7 +63,7 @@ export default class LoginForm extends React.Component {
                      onChange={this.changeHandler}/><br/>
             </div>
           </div>
-          <div className="row">
+          <div className="row margin-small">
             <div className="col-lg-3 col-md-4 col-sm-5">
               <button type="submit"
                       className="btn btn-primary float-right">Login

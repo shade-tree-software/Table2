@@ -6,7 +6,7 @@ import ExportCSV from "./ExportCSV"
 export default class TableDetail extends React.Component {
   render() {
     return (
-      <div hidden={this.props.hidden}>
+      <div className="margin-small" hidden={this.props.hidden}>
         {this.props.columns.length === 0 ? '' : <button onClick={this.props.addNewRow}
                                                         className="btn btn-primary btn-sm mb-3">{this.props.rows.length === 0 ? 'Add Row' : '+'}</button>}
         <span className="form-group float-right mb-3">

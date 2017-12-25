@@ -29,7 +29,7 @@ export default class NewTableForm extends React.Component {
                      value={this.state.tableName}
                      onChange={this.changeHandler}/><br/>
             </div>
-            <div className="col-lg-1 col-md-2 col-sm-3">
+            <div className="col-lg-1 col-md-2 col-sm-3 margin-small">
               <button type="submit"
                       className="btn btn-primary float-right">Add
               </button>

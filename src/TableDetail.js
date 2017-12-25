@@ -382,8 +382,8 @@ export default class TableDetail extends React.Component {
           </MenuItem>
         </ContextMenu>
         <br/>
-        <h1>{this.state.tableName}</h1>
-        <span className="form-check d-inline">
+        <h1 className="margin-small" >{this.state.tableName}</h1>
+        <span className="form-check d-inline margin-small">
           <label hidden={!this.sortingByDate() || this.state.printView} className="form-check-label my-2">
             <input onChange={this.onColorPrefsChange} className="form-check-input" type="checkbox"
                    checked={this.state.colorCodedRows} value=""/>

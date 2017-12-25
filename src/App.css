@@ -8,6 +8,13 @@
   tr.stackable td.hidden-on-sm-collapsed {
     display: none;
   }
+  .container {
+    padding: 0 !important;
+  }
+  .margin-small {
+    margin-left: 15px !important;
+    margin-right: 15px !important;
+  }
 }
 
 @media only screen and (min-width: 576px) {
@@ -52,3 +59,4 @@ html {
 .z-auto {
   z-index: auto !important;
 }
+
