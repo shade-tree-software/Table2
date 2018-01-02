@@ -3,7 +3,7 @@ import React from 'react'
 import ImportCSV from './ImportCSV'
 import ExportCSV from "./ExportCSV"
 
-export default class TableDetail extends React.Component {
+export default class TableBottomControls extends React.Component {
   render() {
     return (
       <div className="margin-small" hidden={this.props.hidden}>

@@ -1,13 +1,13 @@
 import React from 'react'
 import {ContextMenu, MenuItem} from "react-contextmenu";
 import Modal from 'react-modal';
-import {Link} from 'react-router-dom'
 
 import AddColumnButton from './AddColumnButton'
 import TextBoxForm from './TextBoxForm'
 import TableBody from './TableBody'
 import ColumnHeader from './ColumnHeader'
-import TableFooter from "./TableFooter"
+import TableTopControls from "./TableTopControls"
+import TableBottomControls from "./TableBottomControls"
 import './ReactContextMenu.css'
 
 export default class TableDetail extends React.Component {
@@ -383,20 +383,14 @@ export default class TableDetail extends React.Component {
         </ContextMenu>
         <br/>
         <h1 className="margin-small">{this.state.tableName}</h1>
-        <div className="margin-small">
-          {this.state.columns.length === 0 || this.state.rows.length < 10 ? '' :
-            <button onClick={this.addNewRow}
-                    className="btn btn-primary btn-sm mb-3 mr-3">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
-          <span className="form-check d-inline">
-          <label hidden={!this.sortingByDate() || this.state.printView} className="form-check-label my-2">
-            <input onChange={this.onColorPrefsChange} className="form-check-input" type="checkbox"
-                   checked={this.state.colorCodedRows} value=""/>
-            Use color-coded rows when sorting by date
-          </label>
-        </span>
-          <Link className="float-right large-only my-2" hidden={this.state.printView}
-                to={`/tables/${this.state.tableId}?printview=true`}>printer-friendly view</Link>
-        </div>
+        <TableTopControls rows={this.state.rows}
+                          columns={this.state.columns}
+                          addNewRow={this.addNewRow}
+                          sortingByDate={this.sortingByDate()}
+                          printView={this.state.printView}
+                          onColorPrefsChange={this.onColorPrefsChange}
+                          colorCodedRows={this.state.colorCodedRows}
+                          tableId={this.state.tableId}/>
         <table className="table table-hover table-striped">
           <thead>
           <tr className="large-only">
@@ -424,11 +418,11 @@ export default class TableDetail extends React.Component {
             hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
             stopNetworkTimer={this.props.stopNetworkTimer}/>
         </table>
-        <TableFooter tableId={this.state.tableId} tableName={this.state.tableName} rows={this.state.rows}
-                     columns={this.state.columns} addNewRow={this.addNewRow} getSortedRows={this.getSortedRows}
-                     updateTable={this.updateView} showErrorBanner={this.props.showErrorBanner}
-                     hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
-                     stopNetworkTimer={this.props.stopNetworkTimer} hidden={this.state.printView}/>
+        <TableBottomControls tableId={this.state.tableId} tableName={this.state.tableName} rows={this.state.rows}
+                          columns={this.state.columns} addNewRow={this.addNewRow} getSortedRows={this.getSortedRows}
+                          updateTable={this.updateView} showErrorBanner={this.props.showErrorBanner}
+                          hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
+                          stopNetworkTimer={this.props.stopNetworkTimer} hidden={this.state.printView}/>
       </div>
     )
   }
