@@ -403,8 +403,9 @@ export default class TableDetail extends React.Component {
                             startNetworkTimer={this.props.startNetworkTimer}
                             stopNetworkTimer={this.props.stopNetworkTimer}/>
             )}
-            <th><AddColumnButton hidden={this.state.printView} insertColumn={this.insertColumn}
-                                 isFirstColumn={this.state.columns.length === 0}/></th>
+            <th className="cell-align-right"><AddColumnButton hidden={this.state.printView}
+                                                               insertColumn={this.insertColumn}
+                                                               isFirstColumn={this.state.columns.length === 0}/></th>
           </tr>
           </thead>
           <TableBody
@@ -419,10 +420,11 @@ export default class TableDetail extends React.Component {
             stopNetworkTimer={this.props.stopNetworkTimer}/>
         </table>
         <TableBottomControls tableId={this.state.tableId} tableName={this.state.tableName} rows={this.state.rows}
-                          columns={this.state.columns} addNewRow={this.addNewRow} getSortedRows={this.getSortedRows}
-                          updateTable={this.updateView} showErrorBanner={this.props.showErrorBanner}
-                          hideErrorBanner={this.props.hideErrorBanner} startNetworkTimer={this.props.startNetworkTimer}
-                          stopNetworkTimer={this.props.stopNetworkTimer} hidden={this.state.printView}/>
+                             columns={this.state.columns} addNewRow={this.addNewRow} getSortedRows={this.getSortedRows}
+                             updateTable={this.updateView} showErrorBanner={this.props.showErrorBanner}
+                             hideErrorBanner={this.props.hideErrorBanner}
+                             startNetworkTimer={this.props.startNetworkTimer}
+                             stopNetworkTimer={this.props.stopNetworkTimer} hidden={this.state.printView}/>
       </div>
     )
   }

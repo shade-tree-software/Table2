@@ -24,6 +24,9 @@
   .btn.small-only {
     display: none;
   }
+  .cell-align-right {
+    text-align: right;
+  }
 }
 
 .bold-text {

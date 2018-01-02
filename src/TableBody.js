@@ -68,7 +68,7 @@ export default class TableBody extends React.Component {
                      startNetworkTimer={this.props.startNetworkTimer}
                      stopNetworkTimer={this.props.stopNetworkTimer}/>
         ))}
-          <td>
+          <td className="cell-align-right">
             <button hidden={this.props.printView} onClick={(e) => this.onDeleteRowClick(e, rowId)}
                     className="btn btn-danger btn-sm">X
             </button>
