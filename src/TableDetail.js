@@ -382,16 +382,21 @@ export default class TableDetail extends React.Component {
           </MenuItem>
         </ContextMenu>
         <br/>
-        <h1 className="margin-small" >{this.state.tableName}</h1>
-        <span className="form-check d-inline margin-small">
+        <h1 className="margin-small">{this.state.tableName}</h1>
+        <div className="margin-small">
+          {this.state.columns.length === 0 || this.state.rows.length < 10 ? '' :
+            <button onClick={this.addNewRow}
+                    className="btn btn-primary btn-sm mb-3 mr-3">{this.state.rows.length === 0 ? 'Add Row' : '+'}</button>}
+          <span className="form-check d-inline">
           <label hidden={!this.sortingByDate() || this.state.printView} className="form-check-label my-2">
             <input onChange={this.onColorPrefsChange} className="form-check-input" type="checkbox"
                    checked={this.state.colorCodedRows} value=""/>
             Use color-coded rows when sorting by date
           </label>
         </span>
-        <Link className="float-right large-only my-2" hidden={this.state.printView}
-              to={`/tables/${this.state.tableId}?printview=true`}>printer-friendly view</Link>
+          <Link className="float-right large-only my-2" hidden={this.state.printView}
+                to={`/tables/${this.state.tableId}?printview=true`}>printer-friendly view</Link>
+        </div>
         <table className="table table-hover table-striped">
           <thead>
           <tr className="large-only">
