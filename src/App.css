@@ -33,6 +33,10 @@
   font-weight: bold;
 }
 
+.red-text {
+    color: red;
+}
+
 .row-color-a {
   background-color: lightgreen !important;
 }

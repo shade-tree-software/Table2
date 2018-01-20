@@ -66,7 +66,8 @@ export default class TableBody extends React.Component {
                      showErrorBanner={this.props.showErrorBanner}
                      hideErrorBanner={this.props.hideErrorBanner}
                      startNetworkTimer={this.props.startNetworkTimer}
-                     stopNetworkTimer={this.props.stopNetworkTimer}/>
+                     stopNetworkTimer={this.props.stopNetworkTimer}
+                     colorCodedRows={this.props.colorCodedRows}/>
         ))}
           <td className="cell-align-right">
             <button hidden={this.props.printView} onClick={(e) => this.onDeleteRowClick(e, rowId)}

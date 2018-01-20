@@ -51,6 +51,16 @@ export default class TableCell extends React.Component {
     this.props.changeColumnVisibility(this.props.column.columnId, true)
   }
 
+  useRedText = () => {
+    // Show cell text in red if it is a date and it is more than 30 days in the past,
+    // but only if the user has selected the colorCodedRows option
+    let cellDate = (new Date(this.props.text))
+    return this.props.colorCodedRows &&
+      this.props.column.columnName.toLowerCase().includes('date') &&
+      cellDate.toString() !== 'Invalid Date' &&
+      ((new Date()) - cellDate) > 2592000000
+  }
+
   render() {
     if (this.state.editing) {
       return (
@@ -63,7 +73,8 @@ export default class TableCell extends React.Component {
     } else {
       return (
         <td onClick={this.onCellClick} className={this.props.column.hiddenOnMobile ? 'large-only' : ''}>
-          <span hidden={this.props.printView} className="small-only bold-text">{this.props.column.columnName}: </span>{this.props.text}
+          <span hidden={this.props.printView} className="small-only bold-text">{this.props.column.columnName}: </span>
+          <span className={this.useRedText() ? 'red-text' : ''}>{this.props.text}</span>
           <button onClick={this.onHideColumn} hidden={this.props.printView}
                   className="btn btn-warning btn-sm float-right small-only">&lt;</button>
         </td>
