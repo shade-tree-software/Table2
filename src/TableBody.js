@@ -28,14 +28,17 @@ export default class TableBody extends React.Component {
     if (sortDateText && this.props.colorCodedRows) {
       if (sortDateText === 'deleted' || sortDateText === 'unknown') {
         rowColor = 'row-color-na'
-      }
-      let sortDate = new Date(sortDateText)
-      if (sortDate.toString() === 'Invalid Date') {
-        rowColor = 'row-color-invalid'
-      } else if (((new Date()) - sortDate) > 604800000) { // one week
-        rowColor = 'row-color-b'
-      } else if (((new Date()) - sortDate) > 172800000) { // two days
-        rowColor = 'row-color-a'
+      } else if (sortDateText === 'archived') {
+        rowColor = 'row-color-archived'
+      } else {
+        let sortDate = new Date(sortDateText)
+        if (sortDate.toString() === 'Invalid Date') {
+          rowColor = 'row-color-invalid'
+        } else if (((new Date()) - sortDate) > 604800000) { // one week
+          rowColor = 'row-color-b'
+        } else if (((new Date()) - sortDate) > 172800000) { // two days
+          rowColor = 'row-color-a'
+        }
       }
     }
     return rowColor

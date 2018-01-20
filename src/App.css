@@ -49,6 +49,9 @@
 .row-color-na {
   background-color: lightblue !important;
 }
+.row-color-archived {
+  background-color: lightgray !important;
+}
 
 .disable-ios-copy-paste {
   -webkit-user-select: none !important;
