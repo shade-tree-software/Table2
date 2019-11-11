@@ -310,8 +310,8 @@ export default class TableDetail extends React.Component {
           a = textA
           b = textB
         } else {
-          a = dateAisValid ? dateA : new Date(0)
-          b = dateBisValid ? dateB : new Date(0)
+          a = dateAisValid ? dateA : (this.state.sortOrder === 'asc' ? new Date(0) : new Date())
+          b = dateBisValid ? dateB : (this.state.sortOrder === 'asc' ? new Date(0) : new Date())
         }
       } else {
         a = rowDataA[this.state.sortColumnId] ? rowDataA[this.state.sortColumnId].cellText : ''
