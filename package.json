@@ -14,7 +14,7 @@
     "co": "^4.6.0",
     "crypto": "^1.0.1",
     "foreman": "^2.0.0",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.2",
     "gulp-babel": "^7.0.0",
     "jsonwebtoken": "^8.1.0",
     "mongodb": "^2.2.33",
