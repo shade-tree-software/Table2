@@ -16,7 +16,7 @@
     "foreman": "^2.0.0",
     "gulp": "^3.9.1",
     "gulp-babel": "^7.0.0",
-    "jsonwebtoken": "^8.1.0",
+    "jsonwebtoken": "^9.0.0",
     "mongodb": "^2.2.33",
     "project-version": "^1.0.0",
     "react": "^16.0.0",
